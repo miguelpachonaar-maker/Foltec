@@ -5,6 +5,7 @@ const API_URL = 'http://localhost:4000/api/usuarios';
 
 const FormUsuarios = () => {
     const [formData, setFormData] = useState({
+        EstadoUsuario: '',
         NombresApellidos: '',
         TipoDocumento: '',
         NumeroDocumento: '',
@@ -12,7 +13,8 @@ const FormUsuarios = () => {
         Correo: '',
         Area: '',
         Cargo: '',
-        Usuario: ''
+        Usuario: '',
+        Contraseña: ''
     });
 
     const [usuarios, setUsuarios] = useState([]);
@@ -39,8 +41,8 @@ const FormUsuarios = () => {
 
             // Opcional: Limpiar el formulario y recargar la lista
             setFormData({
-                NombresApellidos: '', TipoDocumento: '', NumeroDocumento: '', Contacto: '', Correo: '',
-                Area: '', Cargo: '', Usuario: ''
+                EstadoUsuario: '', NombresApellidos: '', TipoDocumento: '', NumeroDocumento: '', Contacto: '', Correo: '',
+                Area: '', Cargo: '', Usuario: '', Contraseña: ''
             });
     };
 
@@ -66,6 +68,19 @@ const FormUsuarios = () => {
                 </div>
             </div>        
             <div className='DivTodoForm'>
+                <div className='DivCamposFormEquipos'>
+                    <label class="EtiquetaInputEntregas">Estado Usuario</label>
+                    <select 
+                        className="CamposFormEntregas"
+                        name='EstadoUsuario'
+                        value={formData.EstadoUsuario}
+                        onChange={handleChange}
+                    >
+                        <option value="" disabled selected> - - -</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                    </select>
+                </div>
                 <div className='DivCamposFormEquipos'>
                     <label class="EtiquetaInputForm">Nombres y Apellidos</label>
                     <input 
@@ -122,6 +137,7 @@ const FormUsuarios = () => {
                     />
                 </div>
                 <div className='DivCamposFormEquipos'>
+                    <label class="EtiquetaInputEntregas">Elige un área</label>
                     <select 
                         className="CamposFormEntregas"
                         name='Area'
@@ -160,6 +176,17 @@ const FormUsuarios = () => {
                     onChange={handleChange}
                     />
                 </div>
+                <div className='DivCamposFormEquipos'>
+                    <label class="EtiquetaInputForm">Contraseña</label>
+                    <input 
+                    type="password"
+                    name='Contraseña'
+                    className="CamposFormEquipos"
+                    placeholder='********'
+                    value={formData.Contraseña}
+                    onChange={handleChange}
+                    />
+                </div>
             </div>
             <div className="BotonesFormEquipos">
                 <button type="submit" className="BotonGuardar">
@@ -178,6 +205,7 @@ const FormUsuarios = () => {
                     <table>
                         <thead>
                             <tr>
+                                <th>Estado usuario</th>
                                 <th>Nombres y Apellidos</th>
                                 <th>Tipo de Documento</th>
                                 <th>N° Documento</th>
@@ -186,11 +214,13 @@ const FormUsuarios = () => {
                                 <th>Área</th>
                                 <th>Cargo</th>
                                 <th>Usuario</th>
+                                <th>Contraseña</th>
                             </tr>
                         </thead>
                         <tbody>
                             {usuarios.map((user) => (
                                 <tr key={user._id}>
+                                    <td>{user.EstadoUsuario}</td>
                                     <td>{user.NombresApellidos}</td>
                                     <td>{user.TipoDocumento}</td>
                                     <td>{user.NumeroDocumento}</td>
@@ -199,6 +229,7 @@ const FormUsuarios = () => {
                                     <td>{user.Area}</td>
                                     <td>{user.Cargo}</td>
                                     <td>{user.Usuario}</td>
+                                    <td>{user.Contraseña} </td>
                                 </tr>
                             ))}
                         </tbody>

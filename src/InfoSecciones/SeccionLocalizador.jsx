@@ -18,7 +18,7 @@ const LeafletMapComponent = () => {
       {/* Opcional: Agregar un marcador */}
       <Marker position={position}>
         <Popup>
-          ¡Un marcador sencillo en Leaflet!
+          Ubicacion central
         </Popup>
       </Marker>
 

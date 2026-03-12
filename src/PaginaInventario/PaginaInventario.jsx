@@ -3,7 +3,6 @@ import {Link} from 'react-router-dom'
 import React, { useState } from 'react';
 import FormEquipos from '../InfoSecciones/FormEquipos';
 import FormUsuarios from '../InfoSecciones/FormUsuarios.jsx';
-import FormAdmin from '../InfoSecciones/FormAdmin.jsx';
 import FormEntregasyDev from '../InfoSecciones/FormEntregasyDevoluciones.jsx';
 import SeccionSoporte from '../InfoSecciones/SeccionSoporte.jsx';
 import SeccionLocalizador from '../InfoSecciones/SeccionLocalizador.jsx';
@@ -46,9 +45,6 @@ const PaginaInventario = () => {
                         <div className='DivFormUsuarios'>
                             <FormUsuarios></FormUsuarios>
                         </div>
-                        <div className='DivFormUsuarios'>
-                            <FormAdmin></FormAdmin>
-                        </div>
                     </section>
                 );
             case 'Computadoras':
@@ -69,6 +65,22 @@ const PaginaInventario = () => {
                         <div className='TituloSecciones'>
                                 <h2>Lozalización</h2>
                         </div>
+                        <div className='DivCamposFormEquipos'>
+                            <select 
+                                className="CamposFormEntregas"
+                                name='Area'
+                            >
+                                <option value="" disabled selected> Elige un equipo</option>
+                                <option value="equipo1">ING01</option>
+                                <option value="equipo2">ING02</option>
+                                <option value="equipo3">ING03</option>
+                                <option value="equipo4">ADM01</option>
+                                <option value="equipo5">ADM02</option>
+                                <option value="equipo6">ADM03</option>
+                                <option value="equipo7">RRH01</option>
+                            </select>
+                        </div>
+                        <br />
                         <div className='DivLocalizador'>
                             <SeccionLocalizador></SeccionLocalizador>
                         </div>

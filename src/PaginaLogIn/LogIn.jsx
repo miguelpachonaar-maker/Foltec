@@ -54,13 +54,13 @@ const LogIn = () => {
             } else {
                 // Validación fallida (error 401, 400, etc., del servidor)
                 // Mostrar el mensaje de error devuelto por el servidor
-                setError(data.mensaje || 'Credenciales inválidas. Intenta de nuevo.');
+                setError(data.mensaje || 'Credenciales inválidas');
                 console.error('Error de login:', data.mensaje);
             }
 
         } catch (err) {
             // Error de red (el servidor no está corriendo o hay un problema de conexión)
-            setError('Credenciales inválidas. Intenta de nuevo.');
+            setError('Credenciales inválidas. Intenta de nu.');
             console.error('Error de red/conexión:', err);
         }
     };

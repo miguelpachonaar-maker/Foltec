@@ -27,7 +27,16 @@
                     type="number"
                     className="CamposFormSoporte"
                     placeholder='Contacto'
-                    name="Contacto"
+                    name='Contacto'
+                    required
+                    />
+                </div>
+                <div className='DivCamposFormSoporte'>
+                    <input 
+                    type="number"
+                    className="CamposFormSoporte"
+                    placeholder='Usuario con falla'
+                    name="UsuarioFalla"
                     required
                     />
                 </div>
@@ -46,15 +55,6 @@
                     className="CamposFormSoporte"
                     placeholder='Ciudad'
                     name='Ciudad'
-                    required
-                    />
-                </div>
-                <div className='DivCamposFormSoporte'>
-                    <input 
-                    type="email"
-                    className="CamposFormSoporte"
-                    placeholder='Correo'
-                    name='email'
                     required
                     />
                 </div>

@@ -9,12 +9,11 @@ const FormEquipos = () => {
         IDPc: '',
         MAC: '',
         Serial: '',
-        Descripcion: '',
-        Usuario: '',
-        Contraseña: '',
-        Area: '',
+        Marca: '',        
         UsuarioAnyDesk: '',
-        Estado: ''
+        Estado: '',
+        Asignacion: '',
+        Descripcion: ''
     });
 
     const [equipo, setEquipos] = useState([]);
@@ -41,8 +40,8 @@ const FormEquipos = () => {
     
                 // Opcional: Limpiar el formulario y recargar la lista
                 setFormData({
-                    IDPc: '', MAC: '', Serial: '', Descripcion: '', Usuario: '', Contraseña: '', Area: '',
-                    UsuarioAnyDesk: '', Estado: ''
+                    IDPc: '', MAC: '', Serial: '', Marca: '', UsuarioAnyDesk: '', Estado: '', Asignacion: '',
+                    Descripcion: ''
                 });
         };
 
@@ -102,54 +101,15 @@ const FormEquipos = () => {
                     />
                 </div>
                 <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Descripción</label>
+                    <label class="EtiquetaInputForm">Marca</label>
                     <input 
                     type="text"
-                    name='Descripcion' 
+                    name='Marca' 
                     className="CamposFormEquipos"
-                    placeholder='...'
-                    value={formData.Descripcion}
+                    placeholder='Marca'
+                    value={formData.Marca}
                     onChange={handleChange}
                     />
-                </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Usuario</label>
-                    <input 
-                    type="text"
-                    name='Usuario' 
-                    className="CamposFormEquipos"
-                    placeholder='101010'
-                    value={formData.Usuario}
-                    onChange={handleChange}
-                    />
-                </div>      
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Contraseña</label>
-                    <input 
-                    type="password"
-                    name='Contraseña' 
-                    className="CamposFormEquipos"
-                    placeholder='* * * * *'
-                    value={formData.Contraseña}
-                    onChange={handleChange}
-                    />
-                </div>
-                <div className='DivCamposFormEquipos'>
-                    <select
-                        className="CamposFormEntregas"
-                        name='Area'
-                        value={formData.Area}
-                        onChange={handleChange}
-                    >
-                        <option value="" disabled selected> Elige un Área</option>
-                        <option value="Ingeniería">Ingeniería</option>
-                        <option value="Administracion">Administración</option>
-                        <option value="Compras">Compras</option>
-                        <option value="Comercial">Comercial</option>
-                        <option value="Ventas">Ventas</option>
-                        <option value="Logistica">Logística</option>
-                        <option value="Compras">RRHH</option>
-                    </select>
                 </div>
                 <div className='DivCamposFormEquipos'>
                     <label class="EtiquetaInputForm">Usuario AnyDesk</label>
@@ -176,6 +136,30 @@ const FormEquipos = () => {
                         <option value="Reparacion">Reparación</option>
                     </select>
                 </div>
+                <div className='DivCamposFormEquipos'>
+                    <label class="EtiquetaInputEntregas">Asignación</label>
+                    <select 
+                        className="CamposFormEntregas"
+                        name='Asignacion'
+                        value={formData.Asignacion}
+                        onChange={handleChange}
+                    >
+                        <option value="" disabled selected> Elige una opción</option>
+                        <option value="Activo">Asignado</option>
+                        <option value="Inactivo">Libre</option>
+                    </select>
+                </div>
+                <div className='DivCamposFormEquipos'>
+                    <label class="EtiquetaInputForm">Descripción</label>
+                    <textarea 
+                    type="text"
+                    name='Descripcion' 
+                    className="CamposFormEquipos"
+                    placeholder='...'
+                    value={formData.Descripcion}
+                    onChange={handleChange}
+                    />
+                </div>
             </div>     
             <div className="BotonesFormEquipos">
                 <button type="submit" className="BotonGuardar">
@@ -199,12 +183,11 @@ const FormEquipos = () => {
                                 <th>ID Pc</th>
                                 <th>MAC</th>
                                 <th>Serial</th>
-                                <th>Descripción</th>
-                                <th>Usuario</th>
-                                <th>Contraseña</th>
-                                <th>Area</th>
+                                <th>Marca</th>
                                 <th>Usuario AnyDesk</th>
                                 <th>Estado</th>
+                                <th>Asignación</th>
+                                <th>Descripción</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -213,12 +196,10 @@ const FormEquipos = () => {
                                     <td>{equipo.IDPc}</td>
                                     <td>{equipo.MAC}</td>
                                     <td>{equipo.Serial}</td>
-                                    <td>{equipo.Descripcion}</td>
-                                    <td>{equipo.Usuario}</td>
-                                    <td>{equipo.Contraseña}</td>
-                                    <td>{equipo.Area}</td>
+                                    <td>{equipo.Marca}</td>
                                     <td>{equipo.UsuarioAnyDesk}</td>
                                     <td>{equipo.Estado}</td>
+                                    <td>{equipo.Asignacion}</td>
                                 </tr>
                             ))}
                         </tbody>
