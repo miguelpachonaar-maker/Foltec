@@ -45,6 +45,9 @@ const LogIn = () => {
             const data = await response.json();
 
             if (response.ok) {
+
+                // Guardar sesión
+                localStorage.setItem("auth", "true");
                 // Validación exitosa: Redirigir al inventario
                 console.log('Login exitoso:', data.mensaje);
                 // Si el backend devuelve un token, lo guardarías aquí (ej: localStorage.setItem('token', data.token);)

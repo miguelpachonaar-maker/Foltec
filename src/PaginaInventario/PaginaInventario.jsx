@@ -1,15 +1,42 @@
 import '../Estilos/Estilos.css'
 import {Link} from 'react-router-dom'
 import React, { useState } from 'react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FormEquipos from '../InfoSecciones/FormEquipos';
 import FormUsuarios from '../InfoSecciones/FormUsuarios.jsx';
 import FormEntregasyDev from '../InfoSecciones/FormEntregasyDevoluciones.jsx';
 import SeccionSoporte from '../InfoSecciones/SeccionSoporte.jsx';
 import SeccionLocalizador from '../InfoSecciones/SeccionLocalizador.jsx';
 
+
 const PaginaInventario = () => {   
     const [seccionActiva, setSeccionActiva] = useState('Inicio');
 
+ // NECESARIO PARA PODER REDIRIGIR AL LOGIN 
+      const navigate = useNavigate();
+
+      /* VERIFICACIÓN DE SESIÓN AL CARGAR LA PÁGINA 
+       Esto evita que alguien entre al inventario si no está logueado
+       o si intenta volver con la flecha del navegador */
+          useEffect(() => {
+
+        const auth = localStorage.getItem("auth");
+
+        if (!auth) {
+            navigate("/");
+        }
+    }, []);
+        /*  FUNCIÓN PARA CERRAR SESIÓN 
+       Elimina la sesión guardada y redirige al login */
+            const cerrarSesion = () => {
+
+        localStorage.removeItem("auth");
+
+        navigate("/");
+
+    };
+    
     // 2. Función Manejadora de Clic: Actualiza el estado con el ID de la sección.
     const handleMenuClick = (targetId) => {
         setSeccionActiva(targetId);
@@ -109,9 +136,10 @@ const PaginaInventario = () => {
                 <img src="/Foltec.png" alt="LogoFoltec" />
             </div>
             <div >
-                <Link to="/">
-                    <h3 className="CerrarSesion">Cerrar sesión</h3>
-                </Link>  
+                {/* ===== BOTÓN MODIFICADO PARA USAR LA FUNCIÓN DE CERRAR SESIÓN ===== */}
+                 <h3 className="CerrarSesion" onClick={cerrarSesion}>
+                    Cerrar sesión
+                </h3>
             </div>
         </header>
         <nav className='NavPrincipal'>
