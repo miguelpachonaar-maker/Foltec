@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 * {
   margin: 0;
@@ -14,6 +15,7 @@
 .main-content {
   flex: 1;
 }
+
 @import 'leaflet/dist/leaflet.css';
 
 /*ESTILOS LOGIN*/
@@ -95,6 +97,7 @@ a {
 
 
 /*ESTILOS USUARIOS*/
+<<<<<<< HEAD
 
 .DivHeader {
   background-color: rgb(0, 72, 91);
@@ -149,6 +152,34 @@ margin: 0;
 .CerrarSesion:hover {
   background-color: white;
   color: rgb(0,72,91);
+=======
+.HeaderInventario {
+  background-color: rgb(0, 72, 91);
+  width: 100%;
+  height: auto;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+}
+
+.DivHeader {
+  display: flex;
+  text-align: center;
+  align-items: center;
+}
+.DivHeader img {
+  height: 13vh;
+  width: 250px;
+  padding-left: 60px;
+}
+
+.CerrarSesion {
+  padding: 20px 20px 0px 0px;
+  color: white;
+}
+.CerrarSesion:hover {
+  color: red;
+>>>>>>> a57c7a4579498fbcde518ed254de5d2976aa934a
   transition: 0.5s;
   cursor: pointer;
 }
@@ -165,11 +196,15 @@ margin: 0;
 
 .NavPrincipal {
   display: flex;
+<<<<<<< HEAD
   background-color:#0737a0;
   padding: 10px 20px;
   align-items: center;
   gap: 150px;
   justify-content: center;
+=======
+  color: white;
+>>>>>>> a57c7a4579498fbcde518ed254de5d2976aa934a
 }
 .NavPrincipal button {
   display: flex;
@@ -189,6 +224,7 @@ margin: 0;
   cursor: pointer;
 }
 
+<<<<<<< HEAD
 .RutaPagina{
   color: white;
   text-decoration: none;
@@ -203,6 +239,8 @@ margin: 0;
   color: rgb(0,72,91);
 }
 
+=======
+>>>>>>> a57c7a4579498fbcde518ed254de5d2976aa934a
 .DivFormUsuarios {
   padding-bottom: 25vh;
 }
@@ -279,6 +317,7 @@ tbody tr:hover {
 /*ESTILO FORM EQUIPOS*/
 .DivTodoForm {
   display: flex;
+<<<<<<< HEAD
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
@@ -303,6 +342,27 @@ tbody tr:hover {
 }
 
 .FormCard label {
+=======
+  flex-wrap: wrap;
+  margin: 0px 40px 40px 100px;
+}
+.DivCamposFormEquipos {
+  text-align: center;
+  position: relative;
+}
+.BotonesFormEquipos {
+  margin: 40px 0px 40px 100px;
+}
+.CamposFormEquipos {
+  height: 5vh;
+  width: 35vh;
+  border-radius: 10px;
+  text-align: center;
+  margin: 10px;
+  border-color: rgb(0, 72, 91);
+}
+.EtiquetaInputForm {
+>>>>>>> a57c7a4579498fbcde518ed254de5d2976aa934a
   position: absolute;
   transform: translateY(-50%);
   top: 10px;
@@ -313,6 +373,7 @@ tbody tr:hover {
   color: rgb(0, 72, 91);
 }
 
+<<<<<<< HEAD
 .FormCard form {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -359,6 +420,8 @@ tbody tr:hover {
 
 
 
+=======
+>>>>>>> a57c7a4579498fbcde518ed254de5d2976aa934a
 .BotonGuardar {
   background-color: rgb(1, 21, 172);
   color: white;
@@ -538,11 +601,19 @@ h4 {
 }
 
 /*FOOTER*/
+<<<<<<< HEAD
 .Footer {
   display: flex;
   background-color: black;
   padding: 15px 0;
   text-align: center;
+=======
+footer {
+  display: flex;
+  background-color: black;
+  height: 6vh;
+  align-items: center;
+>>>>>>> a57c7a4579498fbcde518ed254de5d2976aa934a
   justify-content: center;
   color: white; 
   width: 100%;
