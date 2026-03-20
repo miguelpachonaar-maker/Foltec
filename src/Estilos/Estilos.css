@@ -1,0 +1,549 @@
+
+* {
+  margin: 0;
+  font-size: 20px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  box-sizing: border-box;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.main-content {
+  flex: 1;
+}
+@import 'leaflet/dist/leaflet.css';
+
+/*ESTILOS LOGIN*/
+.HeaderLogIn {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(0, 72, 91);
+}
+
+.Logo {
+  top: 0;
+}
+.Logo img {
+  height: 150px;
+  width: 350px;
+}
+.LogIn {
+  border-radius: 20px;
+  height: 500px;
+  width: 400px;
+  background-color: white;
+  text-align: center;
+}
+.LogIn h2 {
+  color: black;
+  font-size: 40px;
+  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  padding-top: 50px;
+  padding-bottom: 50px;
+}
+
+.BotonUsuario {
+  width: 60%;
+  height: 30px;
+  border-radius: 20px;
+  padding: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+  border-color: whitesmoke;
+  color: #103A44;
+}
+.BotonUsuario::placeholder {
+  text-align: center;
+  color: rgba(157, 157, 157, 0.721);
+  font-size: 15px;
+}
+
+.DivIngresar {
+  padding-top: 15px;
+}
+
+.Ingresar {
+  background-color: rgb(1, 21, 172);
+  color: white;
+  height: 40px;
+  width: 55%;
+  border-radius: 10px;
+  border-color: rgb(1, 21, 172);
+}
+.Ingresar:hover {
+  background-color: rgb(163, 3, 1);
+  color: white;
+  border-color: rgb(163, 3, 1);
+  transition: 0.3s;
+}
+
+.OlvideContrasena a h5 {
+  color: rgb(109, 185, 226);
+  text-decoration: none;
+  font-size: 17px;
+}
+
+a {
+  text-decoration: none;
+}
+
+
+/*ESTILOS USUARIOS*/
+
+.DivHeader {
+  background-color: rgb(0, 72, 91);
+  width: 100%;
+  color: rgb(0, 0, 0);
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.HeaderLeft,
+.HeaderCenter,
+.HeaderRight {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+ .HeaderLeft{
+  justify-content: flex-start;
+ }
+ .HeaderCenter{
+  justify-content: center;
+ }
+ .HeaderRight{
+  justify-content: flex-end;
+ }
+
+.HeaderLeft img {
+  height: 100px;
+  width: auto;
+}
+
+.HeaderCenter h3 {
+font-size: 35px;
+margin: 0;
+  color: #e0e0e0;
+  font-weight: bold;
+
+}
+
+.CerrarSesion {
+  padding: 8px 16px;
+  height: 40px;
+  color: #ffffff;
+  background-color:transparent;
+  border: 2px solid #ffffff;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.CerrarSesion:hover {
+  background-color: white;
+  color: rgb(0,72,91);
+  transition: 0.5s;
+  cursor: pointer;
+}
+
+.BarraBusqueda {
+  min-width: 400px;
+  height: 35px;
+  border-radius: 20px;
+  text-align: center;
+  border-color: whitesmoke;
+  color: #103A44;
+  margin: 0px 0px 0px 100px;
+}
+
+.NavPrincipal {
+  display: flex;
+  background-color:#0737a0;
+  padding: 10px 20px;
+  align-items: center;
+  gap: 150px;
+  justify-content: center;
+}
+.NavPrincipal button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  justify-content: space-around;
+  list-style-type: none;
+  width: 100%;
+  height: 6vh;
+  color: white;
+  background-color: rgb(1, 21, 172);
+  border: none;
+}
+.NavPrincipal button:hover {
+  background-color: orange;
+  transition: 0.5s;
+  cursor: pointer;
+}
+
+.RutaPagina{
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.RutaPagina:hover {
+  background-color: white;
+  color: rgb(0,72,91);
+}
+
+.DivFormUsuarios {
+  padding-bottom: 25vh;
+}
+
+/*TITULO-SECCIONES*/
+.TituloSecciones {
+  margin: 60px 0px 20px 100px;
+}
+.TituloSecciones h2 {
+  font-size: 30px;
+  color: red;
+  font-weight: bold;
+}
+.TituloSecciones img {
+  height: 40px;
+  width: 40px;
+  margin: 0px 5px 0px 5px;
+  border-radius: 5px;
+}
+.EstiloTitulos {
+  display: flex;
+}
+
+/*ESTILOS TABLA*/
+.DivTablaUsuarios {
+  text-align: center;
+  margin: 40px 0px 40px 100px;
+}
+table {
+  border-collapse: collapse;
+  border: 2px;
+  border-radius: 20px;
+  width: 85%;
+}
+thead tr {
+  background-color: rgb(246, 209, 178);
+}
+th, td {
+  padding: 0px 10px 0px 10px;
+  border: 1px solid #666;
+  padding: 4px;
+}
+td {
+  color: #103A44;
+}
+tbody tr:hover {
+  background-color: #dacdab;
+  cursor: auto;
+}
+
+/*ESTILOS USUARIOS*/
+.EstiloFormEquipos {
+  display: flex;
+  margin: 0px 0px 0px 100px;
+}
+.EstiloFormEquipos button {
+  border-radius: 10px;
+  margin: 0px 10px 0px 10px;
+  height: 6vh;
+  color: white;
+  background-color: rgb(1, 21, 172);
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0px 15px 0px 15px;
+}
+.EstiloFormEquipos button:hover {
+  background-color: orange;
+  transition: 0.5s;
+  cursor: pointer;
+}
+
+/*ESTILO FORM EQUIPOS*/
+.DivTodoForm {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 60px ;
+}
+
+.FormCard {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 700px;
+  width: 100%;
+  box-shadow: 0px 30px 70px rgba(0, 0, 0, 0.2);
+  margin: auto;
+} 
+
+.FormCard h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #bb2121;
+  grid-column:span 2;
+}
+
+.FormCard label {
+  position: absolute;
+  transform: translateY(-50%);
+  top: 10px;
+  font-size: 16px;
+  margin-left: 25px;
+  padding: 0px 5px 0px 5px;
+  background-color: white;
+  color: rgb(0, 72, 91);
+}
+
+.FormCard form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 25px;
+  row-gap: 15px;
+}
+
+.CamposFull {
+  grid-column:span 2;
+}
+
+.FormCard form div{
+  text-align: left;
+  position: relative;
+}
+
+.FormCard input,
+.FormCard select {
+ height: 45px;
+  width: 100%;
+  border-radius: 10px;
+  text-align: center;
+  margin: 10px;
+  border-color: rgb(0, 72, 91);
+}
+
+.FormCard form button{
+  background-color: rgb(1, 21, 172);
+  color: white;
+  height: 50px;
+  width: 250px; 
+  border-radius: 10px;
+  border: none;
+  grid-column: span 2;
+  justify-self: center;
+   transition: all 0.3s ease;
+}
+
+.FormCard form button:hover{
+  background: #0056b3;
+  transform: scale(1.05);
+}
+
+
+
+
+.BotonGuardar {
+  background-color: rgb(1, 21, 172);
+  color: white;
+  height: 40px;
+  width: 35vh;
+  border-radius: 10px;
+  border-color: rgb(1, 21, 172);
+  margin: 0px 10px 0px 10px;
+}
+.BotonGuardar:hover {
+  background-color: orange;
+  border-color: white;
+  transition: 0.3s;
+}
+
+/*ESTILOS FORM ENTREGAS Y DEVOLUCIONES*/
+.EtiquetaInputEntregas {
+  position: absolute;
+  transform: translateY(-50%);
+  top: 10px;
+  font-size: 16px;
+  margin-left: 25px;
+  padding: 0px 5px 0px 5px;
+  background-color: white;
+  color: #274A9B;
+}
+.CamposFormEntregas {
+  height: 5vh;
+  width: 35vh;
+  border-radius: 10px;
+  text-align: center;
+  margin: 10px;
+  border-color: #274A9B;
+}
+.input1[type="file"]::-webkit-file-upload-button {
+  height: 5vh;
+  width: 35vh;
+  border-radius: 10px;
+  text-align: center;
+  margin: 10px;
+  background-color: rgba(220, 220, 220, 0.419);
+}
+
+/*ESTILOS INICIO DEFAULT*/
+.ImagenInicio {
+  text-align: center;
+  margin: 40px 0px 40px 0px;
+}
+.ImagenInicio img {
+  height: 50%;
+  width: 50%;
+  border-radius: 30px;
+}
+
+/*ESTILOS REGISTRO USUARIOS*/
+.TituloInicio {
+  text-align: center;
+  justify-content: center;
+  margin: 40px ;
+}
+.TituloInicio h2 {
+  text-align: center;
+  font-size: 30px;
+  color: red;
+  font-weight: bold;
+}
+.Separador {
+  height: 60px;
+  width: 100%;
+  background-color: #ebeaea;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.732);
+  margin: 70px 0px 60px 0px;
+}
+
+/*SECCION LOCALIZADOR*/
+.DivLocalizador {
+  padding-bottom: 100px;
+  margin: 0vh 10vh 0vh 10vh;
+}
+.DimensionMapa {
+  justify-content: center;
+  width: 80vh;
+  height: 70vh;
+}
+
+/*SECCION SOPORTE*/
+.TituloSecciones2 {
+  padding: 60px 0px 20px 100px;
+  background-color: rgba(254, 253, 224, 0.424);;
+}
+.TituloSecciones2 h2 {
+  font-size: 30px;
+  color: red;
+  font-weight: bold;
+}
+.FormSoporte {
+  display: flex;
+  justify-content: space-between;
+  background-color: rgba(254, 253, 224, 0.424);
+  padding-bottom: 100px;
+}
+.SubFormSoporte {
+  border-radius: 30px;
+  margin-left: 100px;
+}
+
+.DivCamposFormSoporte {
+  text-align: left;
+  position: relative;
+  margin: 15px 0px 15px 0px;
+}
+.CamposFormSoporte {
+  height: 5vh;
+  width: 50vh;
+  padding-left: 20px;
+  border-radius: 10px;
+  text-align: left;
+  border-color: red;
+}
+.TextArea {
+  height: 20vh;
+  width: 50vh;
+  padding-left: 20px;
+  border-radius: 10px;
+  text-align: left;
+  border-color: red;
+}
+
+.ImagenSoporte {
+  width: 80vh;
+  text-align: center;
+  margin: 0px 100px 40px 0px;
+}
+.ImagenSoporte img {
+  width: 100%;
+  height: 60%;
+  border-radius: 20px;
+}
+h4 {
+  font-weight: normal;
+}
+
+.LogoSoporte {
+  text-align: center;
+}
+.LogoSoporte img {
+  width: 20vh;
+  height: 10vh;
+}
+
+.input2[type="file"]::-webkit-file-upload-button {
+  height: 5vh;
+  width: 35vh;
+  border-radius: 10px;
+  text-align: center;
+  margin: 10px;
+  background-color: rgb(249, 249, 249);
+  border-color: red;
+}
+
+.BotonFormSoporte {
+  margin: 15px 0px 15px 0px;
+}
+.BotonEnviar {
+  background-color: blue;
+  color: white;
+  height: 40px;
+  width: 35vh;
+  border-radius: 10px;
+  border-color: blue;
+  margin: 0px 10px 0px 10px;
+}
+.BotonEnviar:hover {
+  background-color: red;
+  border-color: white;
+  transition: 0.3s;
+}
+
+/*FOOTER*/
+.Footer {
+  display: flex;
+  background-color: black;
+  padding: 15px 0;
+  text-align: center;
+  justify-content: center;
+  color: white; 
+  width: 100%;
+}
