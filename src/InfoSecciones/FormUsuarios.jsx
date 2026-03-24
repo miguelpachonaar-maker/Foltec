@@ -1,5 +1,6 @@
 import '../Estilos/Estilos.css'
-import { useEffect, useState } from 'react';
+import React, {useState} from 'react';
+import { useNavigate } from 'react-router-dom';
 
 
 const FormUsuarios = () => {
@@ -16,6 +17,7 @@ const FormUsuarios = () => {
     });
      const [error, setError] = useState(''); 
      const [mensaje, setMensaje] = useState('');
+     const navegar = useNavigate();
     
      const handleChange = (e) => {
         setCredenciales({
@@ -32,7 +34,7 @@ const FormUsuarios = () => {
             const response = await fetch(backendUrl,{
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(credenciales),
             });
@@ -40,6 +42,7 @@ const FormUsuarios = () => {
             if(response.ok){
                 setMensaje("Usuario Registrado Correctamente");
                 setError('');
+                navegar('/Foltec/Usuarios')
                 console.log(data);
 
                 setCredenciales({
@@ -195,6 +198,7 @@ const FormUsuarios = () => {
                 </div>
                 {mensaje && <p style={{ color: "green" }}>{mensaje}</p>}
                 {error && <p style={{ color: "red" }}>{error}</p>}
+               
                     <button type='submit'>
                         Guardar
                     </button>
