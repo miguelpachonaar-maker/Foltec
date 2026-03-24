@@ -27,7 +27,7 @@ const FormUsuarios = () => {
      const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const backendUrl = 'http://localhost:4000/api/Personal'; 
+        const backendUrl = 'http://localhost:4000/api/personal'; 
         try{
             const response = await fetch(backendUrl,{
                 method: 'POST',

@@ -13,10 +13,10 @@ const Index = () => {
         <Route path='/' element={<LogIn />}> </Route>
         <Route path='/Foltec' element={<RootLayout/>} > 
           <Route index element= {<PaginaInventario />}/>
-          <Route path='/Foltec/Usuarios' element ={<FormUsuarios/>}/>
-          <Route path='/Foltec/Equipos' element={<FormEquipos/>}/>
-          <Route path='/Foltec/Localizacion' element ={<Localizador/>}/>
-          <Route path='/Foltec/Soporte' element ={<SeccionSoporte/>}/>
+          <Route path='Usuarios' element ={<FormUsuarios/>}/>
+          <Route path='Equipos' element={<FormEquipos/>}/>
+          <Route path='Localizacion' element ={<Localizador/>}/>
+          <Route path='Soporte' element ={<SeccionSoporte/>}/>
         </Route>
      </Routes>
     </>

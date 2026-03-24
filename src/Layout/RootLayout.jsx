@@ -12,7 +12,7 @@ function RootLayout(){
 
     useEffect(()=> {
         if (!usuarioID) {
-            navigate("/Foltec")
+            navigate("/")
         }
     }, [navigate, usuarioID]);
 
@@ -32,14 +32,17 @@ function RootLayout(){
             </div>
 
             <div className="HeaderCenter">
+                                <h3>{nombreUsuario}</h3>
+            </div>
+             <div className="HeaderRight">
             {usuarioID && (
                 <>
-                <h3>{nombreUsuario}</h3>
-                 <div className="HeaderRight">
+
+
                 <button onClick={cerrarSesion} className="CerrarSesion">
                   Cerrar Sesion.
                 </button>
-                </div>
+
                 </>
             )}
             </div>

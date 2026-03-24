@@ -14,6 +14,33 @@ const pool = new Pool({
   }
 });
 
+app.post("/api/personal", async (req, res) => {
+
+  const {Nombre, Documento, Celular, Estado, Correo, Area, Cargo, Usuario, Contraseña} = req.body;
+  
+  try {
+    await pool.query ("BEGIN")
+
+    await pool.query (
+      "INSERT INTO personal (nombre, documento, celular, estado, correo, area, cargo, usuario, contraseña) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+      [Nombre, Documento, Celular, Estado, Correo, Area, Cargo, Usuario, Contraseña]
+    );
+
+    await pool.query (
+      "INSERT INTO usuarios (usuario, contraseña) VALUES ($1,$2)",
+      [Usuario, Contraseña]
+    );
+
+    await pool.query("COMMIT");
+
+    res.json ({mensaje: "Personal registrado exitosamente"});
+  } catch (error){
+    await pool.query ("ROLLBACK");
+    console.error(error);
+    res.status(500).json({ error: "Error al registrar datos"});
+  }
+});
+
 app.post("/api/login", async (req, res) => {
 
   const { Usuario, Contraseña } = req.body;
@@ -26,9 +53,13 @@ app.post("/api/login", async (req, res) => {
     );
 
     if (result.rows.length > 0) {
+      const usuario = result.rows[0];
+
 
       res.json({
-        mensaje: "Login exitoso"
+        mensaje: "Login exitoso",
+        usuarioID: usuario.id,
+        nombre: usuario.usuario
       });
 
     } else {

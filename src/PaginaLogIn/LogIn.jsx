@@ -46,6 +46,7 @@ const LogIn = () => {
             });
 
             const data = await response.json();
+            console.log("RESPUESTA BACKEND:", data);
 
             if (response.ok) {
                 
