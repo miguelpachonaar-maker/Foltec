@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 const API_URL = 'http://localhost:4000/api/registros';
 
 const FormEntregasyDev = () => {
-    const [formData, setFormData] = useState({
+    const [credenciales, setCredenciales] = useState({
         Gestion: '',
         CODGestion: '',
         FechaINOUT: '',
@@ -18,8 +18,8 @@ const FormEntregasyDev = () => {
     // Función genérica para actualizar el estado cuando cualquier input cambia
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prevFormData => ({
-            ...prevFormData,
+        setCredenciales(prevcredenciales => ({
+            ...prevcredenciales,
             [name]: value
         }));
     };
@@ -27,7 +27,7 @@ const FormEntregasyDev = () => {
     const handleSubmit = async (e) => {
             e.preventDefault();
                 const nuevoEquipoSimulado = {
-                ...formData,
+                ...credenciales,
                 // Simulamos un ID de MongoDB (único y necesario para la 'key' de React)
                 _id: Date.now().toString(), 
                 };
@@ -36,7 +36,7 @@ const FormEntregasyDev = () => {
                 setEntregasyDev(prevEntregasyDev => [...prevEntregasyDev, nuevoEquipoSimulado]);
     
                 // Opcional: Limpiar el formulario y recargar la lista
-                setFormData({
+                setCredenciales({
                     Gestion: '',CODGestion: '',FechaINOUT: '',CedulaUsuario: '',IDPc: '', Documento: ''
                 });
         };
@@ -66,7 +66,7 @@ const FormEntregasyDev = () => {
                     <select
                         className="CamposFormEntregas"
                         name='Gestion'
-                        value={formData.Gestion}
+                        value={credenciales.Gestion}
                         onChange={handleChange}
                     >
                         <option value="" disabled selected>Elige una opción</option>
@@ -81,7 +81,7 @@ const FormEntregasyDev = () => {
                     name='CODGestion'
                     className="CamposFormEntregas"
                     placeholder='EN001 / DEV001'
-                    value={formData.CODGestion}
+                    value={credenciales.CODGestion}
                     onChange={handleChange}
                     />
                 </div>
@@ -92,7 +92,7 @@ const FormEntregasyDev = () => {
                     name='FechaINOUT'
                     className="CamposFormEntregas"
                     placeholder='DD/MM/AAAA'
-                    value={formData.FechaINOUT}
+                    value={credenciales.FechaINOUT}
                     onChange={handleChange}
                     />
                 </div>      
@@ -104,7 +104,7 @@ const FormEntregasyDev = () => {
                     id="Usuario" 
                     className="CamposFormEntregas"
                     placeholder='1234567890'
-                    value={formData.CedulaUsuario}
+                    value={credenciales.CedulaUsuario}
                     onChange={handleChange}
                     />
                 </div>
@@ -116,7 +116,7 @@ const FormEntregasyDev = () => {
                     id="Usuario" 
                     className="CamposFormEntregas"
                     placeholder='ING001'
-                    value={formData.IDPc}
+                    value={credenciales.IDPc}
                     onChange={handleChange}
                     />
                 </div>     
@@ -127,7 +127,7 @@ const FormEntregasyDev = () => {
                     name='Documento'
                     className="input1"
                     accept=".pdf, .docx"
-                    value={formData.Documento}
+                    value={credenciales.Documento}
                     onChange={handleChange}                              
                     />
                 </div>

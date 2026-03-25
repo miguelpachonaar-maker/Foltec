@@ -1,0 +1,189 @@
+import React, { useEffect, useState } from 'react';
+import { Link, ServerRouter, useParams } from 'react-router-dom';
+import Estilos from '../Estilos/Estilos.css'
+
+
+const DetalleEquipos = () => {
+    const {id} = useParams();
+    const [error, setError] = useState ("");
+    const [mensaje, setMensaje] = useState("");
+    const [estados, setEstados] = useState([]);
+    const [marca, setMarca] = useState([]);
+    const [equipo, setEquipo] = useState(null);
+
+    useEffect(() => {
+        if (!id) {
+        setError("ID no válido");
+        return;
+    }
+        const fetchEquipo = async () =>{
+            try {
+                const response = await fetch (`http://localhost:4000/api/equipo/${id}`);
+                const data = await response.json();
+                if (response.ok){
+                    setEquipo(data);
+                } else {
+                    setError(data.error || "No es posible cargar información del equipo");
+                }
+            } catch (err) {
+                console.error(err);
+                setError("Error al conectar al servidor");
+            }
+
+        };
+
+        fetchEquipo();
+    }, [id]);
+
+    useEffect(() => {
+            fetch ("http://localhost:4000/api/select")
+            .then ((res) => res.json())
+            .then ((data) => {
+                setEstados(data.estados);
+                setMarca(data.marca);
+            })
+            .catch ((error) => console.error("Error: ", error));
+        }, []);
+
+    const handleChange = (e) => {
+        const {name, value} =e.target;
+
+        let nuevosDatos ={
+            ...equipo,
+            [name]: value
+        };
+
+
+        if(name === "Marca"){
+            const marcaNormalizada = value.trim().toLowerCase();
+            if (["dell", "lenovo"].includes(marcaNormalizada)){
+                nuevosDatos.TipoPc ="";
+            } else if (["acer", "macbook"].includes(marcaNormalizada)){
+                nuevosDatos.TipoPc = "Portatil";
+            } else {
+                nuevosDatos.TipoPc = "Escritorio";
+            }
+        }
+        setEquipo(nuevosDatos);
+     };
+
+    const handleGuardar = async () => {
+        try{
+            const response = await fetch (`http://localhost:4000/api/equipo/${id}`,{
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(equipo)
+            });
+
+            const data = await response.json();
+            if (response.ok){
+                setMensaje("Información del personal actualizada");
+            } else {
+                setError(data.error || "Error al actualizar");
+                setMensaje('');
+            }
+        } catch (err){
+            console.error("Error", err);
+            setError("Error al conectar con el servidor");
+        
+
+    }
+};
+
+    if (error) return <p style={{ color: 'red' }}>{error}</p>;
+    if (!equipo) return <p>Cargando...</p>;
+
+    return (
+        <div className='Detalles'>
+            <div className='DetallesCard'>
+                
+                <h2>{equipo.IDPc}</h2>
+               <div className='campos-linea'>
+                <div className='campo-item'>
+                    <label>Marca</label>
+                    <select
+                    name='Marca'
+                    value={equipo.Marca}
+                    onChange={handleChange}
+                    required>
+                    {marca.map((marca)=>(
+                        <option key={marca.IdMarca} 
+                        value={marca.IdMarca}>{marca.IdMarca}</option>
+                    ))}
+                </select>
+                </div>
+
+                {["dell", "lenovo"].includes(equipo.Marca?.trim().toLowerCase()) && (
+                    <div>
+                      <label>Tipo de PC</label>  
+                    <select 
+                        name='TipoPc'
+                        value={equipo.TipoPc}
+                        onChange={handleChange}
+                    >
+                        <option value="Escritorio">Escritorio</option>
+                        <option value="Portatil">Portatil</option>
+                    </select>
+                    </div>)
+                    }
+
+                    <div className='campo-item'>
+                        <label>MAC:</label>
+                        <input 
+                        type='text'
+                        name='MAC'
+                        value={equipo.MAC}
+                        onChange={handleChange}
+                        />
+                    </div>
+                    <div className='campo-item'>
+                        <label>Numero de Serial:</label>
+                        <input 
+                        type='text'
+                        name='Serial'
+                        value={equipo.Serial}
+                        onChange={handleChange}
+                        />
+                    </div>
+                    <div className='campo-item'>
+                        <label>Estado:</label>
+                        <select
+                        name='Estado'
+                        value={equipo.Estado}
+                        onChange={handleChange}>
+
+                            {estados.map((estado)=>(
+                        <option key={estado.IdEstado} 
+                        value={estado.IdEstado}>{estado.TipoEstado}</option>
+                    ))}
+                        </select>
+                    </div>
+                    
+    
+                    <div className='campo-item'>
+                        <label>Descripcion:</label>
+                        <input 
+                        type='text'
+                        name='Descripcion'
+                        value={equipo.Descripcion}
+                        onChange={handleChange}
+                        />
+                    </div>
+                    
+                </div>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                <button onClick={handleGuardar}>Guardar Cambios</button>
+                <Link to='/Foltec/Equipos'>
+                <button> Atras </button>
+                </Link>
+                </div>
+                {mensaje && <p style={{ color: 'green' }}>{mensaje}</p>}
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+            </div>
+        </div>
+    );
+}
+
+export default DetalleEquipos;

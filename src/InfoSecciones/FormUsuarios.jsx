@@ -30,7 +30,7 @@ const FormUsuarios = () => {
             [e.target.name]: e.target.value
         });
         setError('');
-     }
+     };
 
      useEffect(() => {
         fetch ("http://localhost:4000/api/select")

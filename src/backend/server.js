@@ -27,13 +27,17 @@ app.get ("/api/select", async (req, res) => {
     
     const documento = await pool.query(
       'SELECT "IdTipoDocumento" FROM "Tipo Documento"'
-    )
+    );
 
+    const marca = await pool.query(
+      'SELECT "IdMarca" FROM "Marca"'
+    );
  
     res.json({
       areas: areas.rows,
       estados: estados.rows,
-      documento: documento.rows
+      documento: documento.rows,
+      marca: marca.rows
     });
   } catch (err){
     console.error(err);
@@ -73,6 +77,54 @@ app.get("/api/usuario/:id", async (req, res) =>{
   }
 });
 
+app.put("/api/equipo/:id", async (req,res)=> {
+  const {id} = req.params;
+  const {Marca, MAC, Serial, Estado, TipoPc, Descripcion} = req.body;
+
+  try{
+    const result = await pool.query(
+      'UPDATE "Computadoras" SET "Marca" = $1, "MAC" = $2, "Serial" = $3, "Estado" = $4, "TipoPc" = $5, "Descripcion"= $6  WHERE "IDPc" = $7 RETURNING *',
+      [Marca, MAC, Serial, Estado, TipoPc, Descripcion, id]
+    );
+    if(result.rows.length === 0)
+      return res.status (400).json({error: "Equipo no encontrado"})
+    res.json(result.rows[0]);
+  } catch (err){
+    console.error(err);
+    res.status(500).json({error: "Error al buscar el Equipo"});
+  }
+});
+app.get("/api/equipo/:id", async (req, res) =>{
+  const {id} = req.params;
+  try{
+    const result = await pool.query(
+      'SELECT * FROM "Computadoras" WHERE "IDPc" = $1', [id]
+    );
+
+    if(result.rows.length === 0)
+      return res.status (400).json({error: "Equipo no encontrado"})
+    res.json(result.rows[0]);
+  } catch (err){
+    console.error(err);
+    res.status(500).json({error: "Error al buscar el Equipo"});
+  }
+});
+app.get("/api/equipos/buscar", async (req, res) => {
+  try{
+    const {q} = req.query;
+    if (!q) return res.status(400).json ({error: "Falta información de busqueda"});
+
+    const result = await pool.query(
+      'SELECT * FROM "Computadoras" WHERE "IDPc" ILIKE $1 OR "Serial" ILIKE $1',
+      [`%${q}%`]
+    );
+
+    res.json(result.rows);
+  } catch (err){
+    console.error(err);
+    res.status(500).json({error: "Error al buscar el Equipo"});
+  }
+})
 app.get("/api/buscar", async (req, res) => {
   try{
     const {q} = req.query;
@@ -88,7 +140,7 @@ app.get("/api/buscar", async (req, res) => {
     console.error(err);
     res.status(500).json({error: "Error al buscar el personal"});
   }
-})
+});
 app.post("/api/personal", async (req, res) => {
 
   const {NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, Contraseña} = req.body;
@@ -102,6 +154,23 @@ app.post("/api/personal", async (req, res) => {
 
 
     res.json ({mensaje: "Personal registrado exitosamente"});
+  } catch (error){
+    console.error(error);
+    res.status(500).json({ error: "Error al registrar datos"});
+  }
+});
+app.post("/api/equipos", async (req, res)=>{
+  const {IDPc, MAC, Serial, Marca, Descripcion, Estado, TipoPc} = req.body;
+
+  try {
+
+    await pool.query(
+      'INSERT INTO "Computadoras" ("IDPc", "MAC","Serial", "Marca", "Descripcion", "EstadoComputadora", "TipoPc") VALUES ($1,$2,$3,$4,$5,$6,$7)',
+      [IDPc, MAC, Serial, Marca, Descripcion, Estado, TipoPc]
+    );
+
+    res.json ({mensaje: "Equipo Registrado exitosamente"});
+
   } catch (error){
     console.error(error);
     res.status(500).json({ error: "Error al registrar datos"});
