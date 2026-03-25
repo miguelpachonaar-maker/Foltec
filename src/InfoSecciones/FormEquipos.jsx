@@ -55,13 +55,12 @@ const FormEquipos = () => {
                 });
         };
 
-    // Función para cargar los datos (Buscar o Visualizar)
+    
     const fetchEquipos = async () => {
             console.warn("ADVERTENCIA: La carga inicial de usuarios está desactivada o fallando debido a un backend inactivo.");
             setEquipos([]);
         };
-        
-        // 5. Cargar los usuarios al montar el componente para visualización
+         
         useEffect(() => {
         fetchEquipos();
     }, []);

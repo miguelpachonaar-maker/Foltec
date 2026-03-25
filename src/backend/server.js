@@ -42,12 +42,12 @@ app.get ("/api/select", async (req, res) => {
 })
 app.put("/api/usuario/:id", async (req,res)=> {
   const {id} = req.params;
-  const {NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario} = req.body;
+  const {TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario} = req.body;
 
   try{
     const result = await pool.query(
-      'UPDATE "Usuarios" SET "NumeroDocumento" = $1, "Contacto" = $2, "Estado" = $3, "Correo" = $4, "Area"= $5, "Cargo"= $6, "NombreUsuario"=$7 WHERE "IdUsuario" = $8 RETURNING *',
-      [NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, id]
+      'UPDATE "Usuarios" SET "TipoDocumento" = $1, "NumeroDocumento" = $2, "Contacto" = $3, "Estado" = $4, "Correo" = $5, "Area"= $6, "Cargo"= $7, "NombreUsuario"=$8 WHERE "IdUsuario" = $9 RETURNING *',
+      [TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, id]
     );
     if(result.rows.length === 0)
       return res.status (400).json({error: "Usuario no encontrado"})
