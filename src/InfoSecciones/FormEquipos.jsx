@@ -1,5 +1,6 @@
 import '../Estilos/Estilos.css'
 import React, { useState, useEffect } from 'react';
+import BotonIcono from '../Estilos/botonIcono';
 
 const API_URL = 'http://localhost:4000/api/registros';
     
@@ -186,9 +187,7 @@ const FormEquipos = () => {
                 </div>  
                   
 
-                <button type='submit'>
-                    Guardar
-                </button>
+                <BotonIcono texto="Guardar" icono="bi-floppy" type="submit" />
                 {mensaje && <p style={{ color: "green" }}>{mensaje}</p>}
                 {error && <p style={{ color: "red" }}>{error}</p>}
 

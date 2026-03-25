@@ -4,6 +4,7 @@ import Footer from "../footer/footer";
 import { useNavigate } from "react-router-dom";
 import "../Estilos/Estilos.css";
 import { useEffect } from "react";
+import BotonIcono from "../Estilos/botonIcono"
 
 function RootLayout(){
     const navigate = useNavigate ();
@@ -39,9 +40,7 @@ function RootLayout(){
                 <>
 
 
-                <button onClick={cerrarSesion} className="CerrarSesion">
-                  Cerrar Sesion.
-                </button>
+                <BotonIcono className="CerrarSesion" onClick={cerrarSesion}  icono="bi-x-circle" texto="Cerrar Sesion"/>
 
                 </>
             )}

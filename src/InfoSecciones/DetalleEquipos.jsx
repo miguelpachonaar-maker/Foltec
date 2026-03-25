@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, ServerRouter, useParams } from 'react-router-dom';
 import Estilos from '../Estilos/Estilos.css'
+import BotonIcono from '../Estilos/botonIcono';
 
 
 const DetalleEquipos = () => {
@@ -174,9 +175,9 @@ const DetalleEquipos = () => {
                     
                 </div>
                 <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                <button onClick={handleGuardar}>Guardar Cambios</button>
+                <BotonIcono texto="Guardar Cambios" icono="bi-floppy" onClick={handleGuardar}/>
                 <Link to='/Foltec/Equipos'>
-                <button> Atras </button>
+                <BotonIcono texto="Atras" icono="bi-arrow-return-left" />
                 </Link>
                 </div>
                 {mensaje && <p style={{ color: 'green' }}>{mensaje}</p>}

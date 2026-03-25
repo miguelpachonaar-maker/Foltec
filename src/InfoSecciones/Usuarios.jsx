@@ -1,6 +1,7 @@
 import '../Estilos/Estilos.css'
 import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
+import BotonIcono from '../Estilos/botonIcono';
 
 const Usuarios = () => {
     const [resultado, setResultado] = useState ([]);
@@ -62,7 +63,7 @@ const Usuarios = () => {
                         onChange={handleChange}
                         required
                         />
-                        <button type='submit'> Buscar </button>
+                        <BotonIcono texto="Buscar" icono="bi-search" type="submit" > Buscar </BotonIcono>
                     </div>
 
                 {mensaje && <p style={{ color: "green" }}>{mensaje}</p>}

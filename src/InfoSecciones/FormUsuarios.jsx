@@ -1,6 +1,7 @@
 import '../Estilos/Estilos.css'
 import React, {useState, useEffect} from 'react';
 import { data, useNavigate } from 'react-router-dom';
+import BotonIcono from '../Estilos/botonIcono';
 
 
 const FormUsuarios = () => {
@@ -233,9 +234,7 @@ const FormUsuarios = () => {
                 {mensaje && <p style={{ color: "green" }}>{mensaje}</p>}
                 {error && <p style={{ color: "red" }}>{error}</p>}
                
-                    <button type='submit'>
-                        Guardar
-                    </button>
+                    <BotonIcono texto="Guardar" icono="bi-floppy" type="submit" />
          </form>
          </div> 
         </div>
