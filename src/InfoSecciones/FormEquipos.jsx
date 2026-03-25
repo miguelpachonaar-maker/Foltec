@@ -17,6 +17,16 @@ const FormEquipos = () => {
     });
 
     const [equipo, setEquipos] = useState([]);
+    const [estados, setEstados] = useState([]);
+        useEffect(() => {
+        fetch ("http://localhost:4000/api/select")
+        .then ((res) => res.json())
+        .then ((data) => {
+            setEstados(data.estados);
+        })
+                 
+       .catch ((error) => console.error("Error: ", error));
+    }, []);
 
     // Función genérica para actualizar el estado cuando cualquier input cambia
     const handleChange = (e) => {
@@ -122,10 +132,11 @@ const FormEquipos = () => {
                         value={formData.Estado}
                         onChange={handleChange}
                     >
-                        <option value="" disabled selected> Elige una opción</option>
-                        <option value="Activo">Activo</option>
-                        <option value="Inactivo">Inactivo</option>
-                        <option value="Reparacion">Reparación</option>
+                        <option value="">Seleccione Estado</option>
+                    {estados.map((estado)=>(
+                        <option key={estado.TipoEstado} 
+                        value={estado.TipoEstado}>{estado.TipoEstado}</option>
+                    ))}
                     </select>
                 </div>
                 <div>

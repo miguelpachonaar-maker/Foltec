@@ -14,15 +14,40 @@ const pool = new Pool({
   }
 });
 
+app.get ("/api/select", async (req, res) => {
+  try{
+     
+    const areas = await pool.query(
+      'SELECT "IdArea" FROM "Area"'
+    );
 
+    const estados = await pool.query(
+      'SELECT "IdEstado",  "TipoEstado" FROM "Estados"'
+    );
+    
+    const documento = await pool.query(
+      'SELECT "IdTipoDocumento" FROM "Tipo Documento"'
+    )
+
+ 
+    res.json({
+      areas: areas.rows,
+      estados: estados.rows,
+      documento: documento.rows
+    });
+  } catch (err){
+    console.error(err);
+    res.status(500).json({error: "Error al obtener datos"})
+  }
+})
 app.put("/api/usuario/:id", async (req,res)=> {
   const {id} = req.params;
-  const {documento, celular, estado, correo, area, cargo, usuario} = req.body;
+  const {NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario} = req.body;
 
   try{
     const result = await pool.query(
-      "UPDATE personal SET documento = $1, celular = $2, estado = $3, correo = $4, area= $5, cargo= $6, usuario=$7 WHERE id = $8 RETURNING *",
-      [documento, celular, estado, correo, area, cargo, usuario, id]
+      'UPDATE "Usuarios" SET "NumeroDocumento" = $1, "Contacto" = $2, "Estado" = $3, "Correo" = $4, "Area"= $5, "Cargo"= $6, "NombreUsuario"=$7 WHERE "IdUsuario" = $8 RETURNING *',
+      [NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, id]
     );
     if(result.rows.length === 0)
       return res.status (400).json({error: "Usuario no encontrado"})
@@ -36,7 +61,7 @@ app.get("/api/usuario/:id", async (req, res) =>{
   const {id} = req.params;
   try{
     const result = await pool.query(
-      "SELECT * FROM personal WHERE id = $1", [id]
+      'SELECT * FROM "Usuarios" WHERE "IdUsuario" = $1', [id]
     );
 
     if(result.rows.length === 0)
@@ -54,7 +79,7 @@ app.get("/api/buscar", async (req, res) => {
     if (!q) return res.status(400).json ({error: "Falta información de busqueda"});
 
     const result = await pool.query(
-      "SELECT * FROM personal WHERE nombre ILIKE $1 OR usuario ILIKE $1",
+      'SELECT * FROM "Usuarios" WHERE "NombresApellidos" ILIKE $1 OR "NombreUsuario" ILIKE $1',
       [`%${q}%`]
     );
 
@@ -66,26 +91,18 @@ app.get("/api/buscar", async (req, res) => {
 })
 app.post("/api/personal", async (req, res) => {
 
-  const {Nombre, Documento, Celular, Estado, Correo, Area, Cargo, Usuario, Contraseña} = req.body;
+  const {NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, Contraseña} = req.body;
   
   try {
-    await pool.query ("BEGIN")
 
     await pool.query (
-      "INSERT INTO personal (nombre, documento, celular, estado, correo, area, cargo, usuario, contraseña) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
-      [Nombre, Documento, Celular, Estado, Correo, Area, Cargo, Usuario, Contraseña]
+      'INSERT INTO "Usuarios" ("NombresApellidos", "TipoDocumento","NumeroDocumento", "Contacto", "Estado", "Correo", "Area", "Cargo", "NombreUsuario", "Contraseña") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
+      [NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, Contraseña]
     );
 
-    await pool.query (
-      "INSERT INTO usuarios (usuario, contraseña) VALUES ($1,$2)",
-      [Usuario, Contraseña]
-    );
-
-    await pool.query("COMMIT");
 
     res.json ({mensaje: "Personal registrado exitosamente"});
   } catch (error){
-    await pool.query ("ROLLBACK");
     console.error(error);
     res.status(500).json({ error: "Error al registrar datos"});
   }
@@ -98,7 +115,7 @@ app.post("/api/login", async (req, res) => {
   try {
 
     const result = await pool.query(
-      "SELECT * FROM usuarios WHERE usuario=$1 AND contraseña=$2",
+      'SELECT * FROM "Usuarios" WHERE "NombreUsuario"=$1 AND "Contraseña"=$2',
       [Usuario, Contraseña]
     );
 
@@ -108,8 +125,8 @@ app.post("/api/login", async (req, res) => {
 
       res.json({
         mensaje: "Login exitoso",
-        usuarioID: usuario.id,
-        nombre: usuario.usuario
+        usuarioID: usuario.IdUsuario,
+        nombre: usuario.NombreUsuario
       });
 
     } else {

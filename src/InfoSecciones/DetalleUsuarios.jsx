@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Link, ServerRouter, useParams } from 'react-router-dom';
 import Estilos from '../Estilos/Estilos.css'
-import { Draggable } from 'leaflet';
 
 const DetalleUsuarios = () => {
     const {id} = useParams();
     const [usuario, setUsuario] = useState(null);
     const [error, setError] = useState ("");
     const [mensaje, setMensaje] = useState("");
+    const [areas, setAreas] = useState([]);
+    const [estados, setEstados] = useState([]);
+    const [documento, setDocumeto] = useState([]);
 
     useEffect(() => {
+        if (!id) {
+        setError("ID no válido");
+        return;
+    }
         const fetchUsuario = async () =>{
             try {
                 const response = await fetch (`http://localhost:4000/api/usuario/${id}`);
@@ -23,10 +29,22 @@ const DetalleUsuarios = () => {
                 console.error(err);
                 setError("Error al conectar al servidor");
             }
+
         };
 
         fetchUsuario();
     }, [id]);
+
+    useEffect(() => {
+            fetch ("http://localhost:4000/api/select")
+            .then ((res) => res.json())
+            .then ((data) => {
+                setAreas(data.areas);
+                setEstados(data.estados);
+                setDocumeto(data.documento);
+            })
+            .catch ((error) => console.error("Error: ", error));
+        }, []);
 
     const handleChange = (e) =>{
         setUsuario({
@@ -69,16 +87,28 @@ const DetalleUsuarios = () => {
         <div className='Detalles'>
             <div className='DetallesCard'>
                 
-                <h2>{usuario.nombre}</h2>
+                <h2>{usuario.NombresApellidos}</h2>
                 
-              
+                <div className='campo-item'>
+                    <label>Tipo De Documento:</label>
+                    <select
+                    name='TipoDocumento'
+                    value={usuario.TipoDocumento}
+                    onChange={handleChange}
+                    required>
+                    {documento.map((documento)=>(
+                        <option key={documento.IdTipoDocumento} 
+                        value={documento.IdTipoDocumento}>{documento.IdTipoDocumento}</option>
+                    ))}
+                </select>
+                </div>
                 <div className='campos-linea'>
                     <div className='campo-item'>
                         <label>Documento:</label>
                         <input 
                         type='text'
-                        name='documento'
-                        value={usuario.documento}
+                        name='NumeroDocumento'
+                        value={usuario.NumeroDocumento}
                         onChange={handleChange}
                         />
                     </div>
@@ -86,53 +116,52 @@ const DetalleUsuarios = () => {
                         <label>Celular:</label>
                         <input 
                         type='text'
-                        name='celular'
-                        value={usuario.celular}
+                        name='Contacto'
+                        value={usuario.Contacto}
                         onChange={handleChange}
                         />
                     </div>
                     <div className='campo-item'>
                         <label>Estado:</label>
                         <select
-                        name='estado'
-                        value={usuario.estado}
+                        name='Estado'
+                        value={usuario.Estado}
                         onChange={handleChange}>
 
-                            <option value="Activo">Activo</option>
-                            <option value="Inactivo">Inactivo</option>
+                            {estados.map((estado)=>(
+                        <option key={estado.IdEstado} 
+                        value={estado.IdEstado}>{estado.IdEstado}</option>
+                    ))}
                         </select>
                     </div>
                     <div className='campo-item'>
                         <label>Correo:</label>
                         <input
                         type='text'
-                        name='correo'
-                        value={usuario.correo}
+                        name='Correo'
+                        value={usuario.Correo}
                         onChange={handleChange}
                         />
                     </div>
                     <div className='campo-item'>
                         <label>Area:</label>
                         <select
-                        name='area'
-                        value={usuario.area}
+                        name='Area'
+                        value={usuario.Area}
                         onChange={handleChange}>
 
-                            <option value="Ingenieria">Ingeniería</option>
-                            <option value="Administracion">Administración</option>
-                            <option value="Compras">Compras</option>
-                            <option value="Comercial">Comercial</option>
-                            <option value="Ventas">Ventas</option>
-                            <option value="Logistica">Logística</option>
-                            <option value="RRHH">RRHH</option>
+                            {areas.map((area)=>(
+                            <option key={area.IdArea} 
+                            value={area.IdArea} >{area.IdArea}</option>
+                        ))}
                         </select>
                     </div>
                     <div className='campo-item'>
                         <label>Cargo:</label>
                         <input 
                         type='text'
-                        name='cargo'
-                        value={usuario.cargo}
+                        name='Cargo'
+                        value={usuario.Cargo}
                         onChange={handleChange}
                         />
                     </div>
@@ -140,8 +169,8 @@ const DetalleUsuarios = () => {
                         <label>Usuario:</label>
                         <input 
                         type='text'
-                        name='usuario'
-                        value={usuario.usuario}
+                        name='NombreUsuario'
+                        value={usuario.NombreUsuario}
                         onChange={handleChange}
                         />
                     </div>

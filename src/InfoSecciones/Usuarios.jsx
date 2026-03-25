@@ -73,13 +73,13 @@ const Usuarios = () => {
                 <div>
                     {resultado.map(result => (
                         <div key={result.id} className='Resultados'>
-                            <Link to={`/Foltec/Usuarios/${result.id}`} style={{ textDecoration: 'none', color: 'black' }}>
-                            <p><strong>Nombre:</strong> {result.nombre}</p>
+                            <Link to={`/Foltec/Usuarios/${result.IdUsuario}`} style={{ textDecoration: 'none', color: 'black' }}>
+                            <p><strong>Nombre:</strong> {result.NombresApellidos}</p>
                             </Link>
-                            <p><strong>Estado:</strong> {result.estado}</p>
-                            <p><strong>Usuario:</strong> {result.usuario}</p>
-                            <p><strong>Area:</strong> {result.area}</p>
-                            <p><strong>Cargo:</strong> {result.cargo}</p>
+                            <p><strong>Estado:</strong> {result.Estado}</p>
+                            <p><strong>Usuario:</strong> {result.NombreUsuario}</p>
+                            <p><strong>Area:</strong> {result.Area}</p>
+                            <p><strong>Cargo:</strong> {result.Cargo}</p>
                         </div>
                     ))}
 

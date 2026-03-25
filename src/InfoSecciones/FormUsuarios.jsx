@@ -1,11 +1,12 @@
 import '../Estilos/Estilos.css'
-import React, {useState} from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useState, useEffect} from 'react';
+import { data, useNavigate } from 'react-router-dom';
 
 
 const FormUsuarios = () => {
     const [credenciales, setCredenciales] = useState({
         Nombre: '',
+        TipoDocumento:'',
         Documento: '',
         Celular:'',
         Estado: '',
@@ -18,6 +19,10 @@ const FormUsuarios = () => {
      const [error, setError] = useState(''); 
      const [mensaje, setMensaje] = useState('');
      const navegar = useNavigate();
+     const [areas, setAreas] = useState([]);
+     const [estados, setEstados] = useState([]);
+     const [documento, setDocumeto] = useState([]);
+
     
      const handleChange = (e) => {
         setCredenciales({
@@ -26,6 +31,18 @@ const FormUsuarios = () => {
         });
         setError('');
      }
+
+     useEffect(() => {
+        fetch ("http://localhost:4000/api/select")
+        .then ((res) => res.json())
+        .then ((data) => {
+            setAreas(data.areas);
+            setEstados(data.estados);
+            setDocumeto(data.documento);
+        })
+        
+        .catch ((error) => console.error("Error: ", error));
+    }, []);
      const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -46,14 +63,15 @@ const FormUsuarios = () => {
                 console.log(data);
 
                 setCredenciales({
-                    Nombre: '',
-                    Documento: '',
-                    Celular:'',
+                    NombresApellidos: '',
+                    TipoDocumento:'',
+                    NumeroDocumento: '',
+                    Contacto:'',
                     Estado: '',
                     Correo:'',
                     Area:'',
                     Cargo: '',
-                    Usuario: '',
+                    NombreUsuario: '',
                     Contraseña: ''
                 });
             } else {
@@ -73,26 +91,42 @@ const FormUsuarios = () => {
         <form onSubmit={handleSubmit}>
                     <h2>Registrar Personal</h2>
             
-                <div>
+                <div className='CamposFull'>
                 <label>Nombres y Apellidos</label>
-                <input
+                <input 
                     type="text"
-                    name="Nombre"
-                    id="Nombre"
+                    name="NombresApellidos"
+                    id="NombresApellidos"
                     placeholder="Nombre Completo"
-                    value={credenciales.Nombre}
+                    value={credenciales.NombresApellidos}
                     onChange={handleChange}
                     required
                 />
                 </div>
                 <div>
+                    <label>Tipo de Documento</label>
+                <select
+                    name='TipoDocumento'
+                    id='TipoDocumento'
+                    value={credenciales.TipoDocumento}
+                    onChange={handleChange}
+                    required
+                >
+                    <option value="">Seleccione Tipo Documento</option>
+                    {documento.map((documento)=>(
+                        <option key={documento.IdTipoDocumento} 
+                        value={documento.IdTipoDocumento}>{documento.IdTipoDocumento}</option>
+                    ))}
+                </select>
+                </div>
+                <div>
                     <label>Numero de documento</label>
                 <input
                     type="text"
-                    name="Documento"
-                    id="Documento"
+                    name="NumeroDocumento"
+                    id="NumeroDocumento"
                     placeholder="Número de Documento"
-                    value={credenciales.Documento}
+                    value={credenciales.NumeroDocumento}
                     pattern="[0-9]{2,}"
                     onChange={handleChange}
                     required
@@ -102,11 +136,11 @@ const FormUsuarios = () => {
                 <label>Contacto</label>
                 <input 
                     type="text"
-                    name="Celular"
-                    id="Celular"
+                    name="Contacto"
+                    id="Contacto"
                     pattern='[0-9]{10}'
-                    placeholder='Número de celular'
-                    value={credenciales.Celular}
+                    placeholder='Número de Contacto'
+                    value={credenciales.Contacto}
                     onChange={handleChange}
                     required
                 />
@@ -121,8 +155,10 @@ const FormUsuarios = () => {
                     required
                 >
                     <option value="">Seleccione Estado</option>
-                    <option value="Activo">Activo</option>
-                    <option value="Inactivo">Inactivo</option>
+                    {estados.map((estado)=>(
+                        <option key={estado.IdEstado} 
+                        value={estado.IdEstado}>{estado.IdEstado}</option>
+                    ))}
                 </select>
                 </div>
                 <div className='CamposFull'>
@@ -146,14 +182,12 @@ const FormUsuarios = () => {
                     onChange={handleChange}
                     required
                     >
-                        <option value="">Seleccione Area</option>
-                        <option value="Ingenieria">Ingeniería</option>
-                        <option value="Administracion">Administración</option>
-                        <option value="Compras">Compras</option>
-                        <option value="Comercial">Comercial</option>
-                        <option value="Ventas">Ventas</option>
-                        <option value="Logistica">Logística</option>
-                        <option value="RRHH">RRHH</option>
+                        <option value="">Seleccione Área</option>
+                        {areas.map((area)=>(
+                            <option key={area.IdArea} 
+                            value={area.IdArea} >{area.IdArea}</option>
+                        ))}
+                    
                     </select>
                 </div>
                 <div>
@@ -172,9 +206,9 @@ const FormUsuarios = () => {
                     <label>Usuario</label>
                     <input
                     type='text'
-                    name='Usuario'
-                    id='Usuario'
-                    value={credenciales.Usuario}
+                    name='NombreUsuario'
+                    id='NombreUsuario'
+                    value={credenciales.NombreUsuario}
                     onChange={handleChange}
                     required
                     pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]{4,20}"
