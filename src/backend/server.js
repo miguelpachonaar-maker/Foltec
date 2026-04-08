@@ -1,6 +1,7 @@
-const express = require("express");
-const cors = require("cors");
-const { Pool } = require("pg");
+import express from "express";
+import cors from "cors";
+import pkg from "pg";
+const { Pool } = pkg;
 
 
 const app = express();
@@ -15,6 +16,90 @@ const pool = new Pool({
   }
 });
 
+app.post ("/api/asignar", async (req, res) =>{
+
+  const {IDUsuario, fecha, IDPc, Observaciones} = req.body;
+  try{
+    await pool.query(
+      'INSERT INTO "Asignacion" ("IdUsuario", "FechaAsignacion", "IDPc","Observaciones") VALUES ($1, $2, $3, $4)',
+      [IDUsuario, fecha, IDPc, Observaciones]
+    );
+
+    res.json ({mensaje:"Asignación registrada exitosamente"});
+  } catch (err){
+    console.error(err);
+    res.status(500).json({ error: "Error al registrar datos"});
+  }
+})
+app.post("/api/personal", async (req, res) => {
+
+  const {NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, Contraseña} = req.body;
+  
+  try {
+
+    await pool.query (
+      'INSERT INTO "Usuarios" ("NombresApellidos", "TipoDocumento","NumeroDocumento", "Contacto", "Estado", "Correo", "Area", "Cargo", "NombreUsuario", "Contraseña") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
+      [NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, Contraseña]
+    );
+
+
+    res.json ({mensaje: "Personal registrado exitosamente"});
+  } catch (error){
+    console.error(error);
+    res.status(500).json({ error: "Error al registrar datos"});
+  }
+});
+
+app.get ("/api/computadoras/disponibles", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT c.* FROM "Computadoras" c LEFT JOIN "Asignacion" a ON c."IDPc" = a."IDPc" WHERE a."IDPc" IS NULL AND c."Estado" != 'Reparacion' AND c."Estado" != 'Inactivo'`
+    );
+    res.json(result.rows);
+  }catch (err){
+    console.error(err);
+    res.status(500).json({error: "Error al obtener el equipo"})
+}
+  
+})
+app.get("/api/asignacion/cedula/:cedula", async (req, res) => {
+  try{
+    const {cedula} =req.params;
+
+    const result = await pool.query(
+      'SELECT "IdUsuario", "NombresApellidos" FROM "Usuarios" WHERE "NumeroDocumento" = $1', [cedula]
+    );
+    if(result.rows.length === 0)
+      return res.status (400).json({error: "Usuario no encontrado"})
+    res.json(result.rows[0]);
+
+  }catch (err){
+    console.error(err);
+    res.status(500).json({error: "Error al obtener el usuario"})
+}
+})
+app.get("/api/equipos", async (req, res)=> {
+  try{
+    const result = await pool.query(
+     `SELECT c.*, CASE WHEN c."Estado" = 'Inactivo' THEN 'INACTIVO' WHEN c."Estado" = 'Reparacion' THEN 'Disponible-Reparación' WHEN a."IDPc" IS NULL THEN 'Disponible' ELSE 'Asignado' END AS "Asignacion" FROM "Computadoras"c LEFT JOIN "Asignacion" a ON c."IDPc" =  a."IDPc"`
+    );
+    res.json(result.rows);
+  }catch (err){
+    console.error(err);
+    res.status(500).json({error: "Error al obtener equipos"})
+  }
+})
+app.get("/api/usuarios", async (req, res)=> {
+  try{
+    const result = await pool.query(
+        `SELECT u.*, CASE WHEN c."IDPc" IS NULL THEN 'Sin Equipo' ELSE c."IDPc" END AS "Equipo" FROM "Usuarios" u LEFT JOIN "Asignacion" a ON u."IdUsuario" = a."IdUsuario" LEFT JOIN "Computadoras" c ON a."IDPc" = c."IDPc"`
+    );
+    res.json(result.rows);
+  }catch (err){
+    console.error(err);
+    res.status(500).json({error: "Error al obtener usuarios"})
+  }
+})
 app.get ("/api/select", async (req, res) => {
   try{
      
@@ -33,12 +118,14 @@ app.get ("/api/select", async (req, res) => {
     const marca = await pool.query(
       'SELECT "IdMarca" FROM "Marca"'
     );
+
+    
  
     res.json({
       areas: areas.rows,
       estados: estados.rows,
       documento: documento.rows,
-      marca: marca.rows
+      marca: marca.rows,
     });
   } catch (err){
     console.error(err);
@@ -99,7 +186,7 @@ app.get("/api/equipo/:id", async (req, res) =>{
   const {id} = req.params;
   try{
     const result = await pool.query(
-      'SELECT * FROM "Computadoras" WHERE "IDPc" = $1', [id]
+      `SELECT c.*,  CASE WHEN a."IdUsuario" IS NULL THEN 'Sin Usuario' ELSE u."NombreUsuario" END AS "ASIGNACION" FROM "Computadoras" c LEFT JOIN "Asignacion" a ON c."IDPc" = a."IDPc" LEFT JOIN "Usuarios" u ON a."IdUsuario" = u."IdUsuario" WHERE c."IDPc" = $1`, [id]
     );
 
     if(result.rows.length === 0)
@@ -132,7 +219,7 @@ app.get("/api/buscar", async (req, res) => {
     if (!q) return res.status(400).json ({error: "Falta información de busqueda"});
 
     const result = await pool.query(
-      'SELECT * FROM "Usuarios" WHERE "NombresApellidos" ILIKE $1 OR "NombreUsuario" ILIKE $1',
+      `SELECT * FROM "Usuarios" WHERE "NombresApellidos" ILIKE $1 OR "NombreUsuario" ILIKE $1 `,
       [`%${q}%`]
     );
 
@@ -166,7 +253,7 @@ app.post("/api/equipos", async (req, res)=>{
   try {
 
     await pool.query(
-      'INSERT INTO "Computadoras" ("IDPc", "MAC","Serial", "Marca", "Descripcion", "EstadoComputadora", "TipoPc") VALUES ($1,$2,$3,$4,$5,$6,$7)',
+      'INSERT INTO "Computadoras" ("IDPc", "MAC","Serial", "Marca", "Descripcion", "Estado", "TipoPc") VALUES ($1,$2,$3,$4,$5,$6,$7)',
       [IDPc, MAC, Serial, Marca, Descripcion, Estado, TipoPc]
     );
 

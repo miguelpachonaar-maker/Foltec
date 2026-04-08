@@ -3,6 +3,7 @@ import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import BotonIcono from '../Estilos/botonIcono';
+import { useEffect } from 'react';
 
 const Equipos =() =>{
     const [resultado, setResultado] = useState ([]);
@@ -14,13 +15,32 @@ const Equipos =() =>{
             setBusqueda(e.target.value);
             setError('');
         }
+        const obtener = async () => {
+        try{
+            const response = await fetch ("http://localhost:4000/api/equipos");
+            const data = await response.json();
+
+            if(response.ok){
+                setResultado(data);
+            } else{
+                setError("Error al obtener equipos")
+            }
+        } catch (err){
+            console.error(err);
+            setError("Error al conectar con el servidor")
+        }
+        } 
+        useEffect(() => {
+            obtener();
+        }, []);
+        
     
         const handleBuscar = async (e) => {
     
             e.preventDefault();
             if (!busqueda.trim()){
-                setError("Ingrese un Serial o ID para buscar");
-                setResultado([]);
+                setError("");
+                obtener();
                 return;
             }
     
@@ -50,7 +70,7 @@ const Equipos =() =>{
     
         return (
             <div className='Busqueda'>
-                <div className='BusquedaCard'>
+
                     <form onSubmit={handleBuscar}>
                         <h2>Buscar Equipos</h2>
     
@@ -62,7 +82,7 @@ const Equipos =() =>{
                             placeholder='Ingrese Serial o ID'
                             value={busqueda}
                             onChange={handleChange}
-                            required
+                            required    
                             />
                             <BotonIcono texto="Buscar" icono="bi-search" type="submit" />
                         </div>
@@ -71,24 +91,42 @@ const Equipos =() =>{
                     {error && <p style={{ color: "red" }}>{error}</p>}
     
                     </form>
-    
-                    <div>
+                    <div className="TablaContainer">
+                        <div className="TablaHeader">
+                            <span>Nombre</span>
+                            <span>Serial</span>
+                            <span>Estado</span>
+                            <span>Tipo</span>
+                            <span>Marca</span>
+                            <span>Asignación</span>
+                        </div>
+                     </div>
                         {resultado.map(result => (
-                            <div key={result.id} className='Resultados'>
-                                <Link to={`/Foltec/Equipos/${result.IDPc}`} style={{ textDecoration: 'none', color: 'black' }}>
-                                <p><strong>Nombre:</strong> {result.IDPc}</p>
-                                </Link>
-                                <p><strong>Estado:</strong> {result.Estado}</p>
-                                <p><strong>Usuario:</strong> {result.TipoPc}</p>
+                            <div key={result.IDPc} className="TablaFila">
+                                    <Link to={`/Foltec/Equipos/${result.IDPc}`}style={{ textDecoration: 'none', color: 'black' }}>
+                                    <span>{result.IDPc}</span>
+                                    </Link>
+                                    <span>{result.Serial}</span>
+                                        <span className={result.Estado === "Activo" ? "estado-activo" : "estado-reparacion"}>
+                                        {result.Estado}
+                                        </span>
+                                    <span>{result.TipoPc}</span>
+                                    <span>{result.Marca}</span> 
+                                    <span className={result.Asignacion === "Asignado" ? "asignado" : "disponible"}>
+                                    {result.Asignacion}
+                                    </span>  
                             </div>
                         ))}
-    
-                        <div className='links'> 
-                            <Link to="/Foltec/RegistroEquipos"> Registrar Equipo </Link>
+        
+                        <div className='acciones'> 
+                            <Link to="/Foltec/RegistroEquipos"> 
+                            <BotonIcono texto="Registrar" icono="bi-folder-plus" /> 
+                            </Link>
+                            <Link to="/Foltec/Equipos/asignacion"> 
+                            <BotonIcono texto="Asignar Equipo" icono="bi-window-plus" /> 
+                            </Link>
                         </div>
-                    </div>
     
-                </div>
             </div>
         );
 

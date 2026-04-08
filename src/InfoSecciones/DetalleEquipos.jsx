@@ -17,7 +17,8 @@ const DetalleEquipos = () => {
         setError("ID no válido");
         return;
     }
-        const fetchEquipo = async () =>{
+
+    const fetchEquipo = async () =>{
             try {
                 const response = await fetch (`http://localhost:4000/api/equipo/${id}`);
                 const data = await response.json();
@@ -31,7 +32,7 @@ const DetalleEquipos = () => {
                 setError("Error al conectar al servidor");
             }
 
-        };
+    };
 
         fetchEquipo();
     }, [id]);
@@ -172,9 +173,28 @@ const DetalleEquipos = () => {
                         onChange={handleChange}
                         />
                     </div>
+
+                    <div className='campo-item'>
+                        <label>Usuario Asignado:</label>
+                        <input 
+                        type='text'
+                        value={equipo.ASIGNACION}
+                        readOnly
+                        />
+                    </div>
+                     </div>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+
+                    {equipo.ASIGNACION === "Sin Usuario" ? (
+                    <Link to="/Foltec/Equipos/asignacion"> 
+                     <BotonIcono texto="Asignar Equipo" icono="bi-window-plus" /> 
+                     </Link>) : (<Link to="/Foltec/Equipos/asignacion"> 
+                     <BotonIcono texto="Eliminar Asignación" icono="bi-person-x-fill" /> 
+                     </Link>)
+                    }
                     
-                </div>
-                <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+
+                
                 <BotonIcono texto="Guardar Cambios" icono="bi-floppy" onClick={handleGuardar}/>
                 <Link to='/Foltec/Equipos'>
                 <BotonIcono texto="Atras" icono="bi-arrow-return-left" />

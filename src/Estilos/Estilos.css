@@ -351,13 +351,26 @@ tbody tr:hover {
 }
 
 .FormCard input,
-.FormCard select {
+.FormCard select,
+.FormCard textarea {
  height: 45px;
   width: 100%;
   border-radius: 10px;
   text-align: center;
   margin: 10px;
   border-color: rgb(0, 72, 91);
+}
+
+.acciones {
+  display: flex;
+  gap: 100px; 
+  margin-top: 10px;
+  justify-content: center;
+}
+.acciones a {
+  text-decoration: none;
+  color: #0d47a1;
+  font-weight: 500;
 }
 
 .FormCard form button{
@@ -379,19 +392,71 @@ tbody tr:hover {
 
 
 
+/*ESTILOS RESULTADOS Y BUSQUEDA OPCION TABLA*/
+.TablaContainer {
+  width: 100%;
+  margin-top: 20px;
+}
+
+
+.TablaHeader {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  background: #0b1fa5;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px 10px 0 0;
+  font-weight: bold;
+}
+
+
+.TablaFila {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  padding: 15px 20px;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  transition: 0.2s ease;
+}
+
+
+.TablaFila:hover {
+  background: #f5f7ff;
+}
+
+
+.TablaFila:last-child {
+  border-radius: 0 0 10px 10px;
+}
+
+.estado-activo {
+  color: green;
+  font-weight: bold;
+}
+
+.estado-reparacion {
+  color: orange;
+  font-weight: bold;
+}
+.estado-inactivo {
+  color: rgb(255, 0, 0);
+  font-weight: bold;
+}
+
 
 
 /*ESTILOS RESULTADOS Y BUSQUEDA*/
 .Busqueda {
   display: flex;
-  justify-content: center; 
+  flex-direction: column;
+  align-items: stretch;
   padding: 40px 20px;     
   background-color: #f0f2f5; 
 
 }
-.Busquedacard{
-  max-width: 900px;   
-  width: 90%;           
+.BusquedaCard{
+  max-width: 1500px;   
+  width: 100%;           
   margin: 30px auto;    
   padding: 30px;        
   background-color: #f9f9f9; 
@@ -402,23 +467,22 @@ tbody tr:hover {
 }
 
 .Busqueda input {
-  min-width: 400px;
-  height: 35px;
+  flex: 3;
+  height: 40px;
   border-radius: 20px;
-  text-align: center;
-  padding: 12px 16px;
-  border-color: whitesmoke;
-  color: #103A44;
-  margin: 0px 0px 0px 100px;
-  flex: 2;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
 } 
 
+.Busqueda form {
+  width: 100%;
+}
 
 .BusquedaContainer {
   display: flex;
-  gap: 40px; 
-  justify-content: center; 
-  margin-bottom: 20px;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
 }
 
 .Busqueda button {
@@ -436,17 +500,56 @@ tbody tr:hover {
   background: #0056b3;
   transform: scale(1.05);
 }
-.Resultados{
-  margin-top: 20px;
-  border-bottom: 1px solid #ccc;
-  padding: 10px;
-  flex-wrap: wrap;
-  gap: 15px;
-  display: flex;
 
-
+.Resultadoscard {
+  width: 100%;
+  max-width: 1500px;
+  margin: 20px 0;   
 }
 
+.Resultados{
+  display: flex;
+  width: 100%; 
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 15px;
+  margin-top: 10px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  transition: 0.2s ease;
+}
+.Resultados:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: scale(1.01);
+}
+.Info h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.Info p {
+  margin: 0;
+  font-size: 15px;
+  color: rgb(0, 0, 0);
+}
+
+.Infor {
+  background: #f1f1f1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.Estado {
+  color: #000;
+}
+
+.Infor, .Estado {
+  text-align: left;
+}
 /*DETALLE USUARIOS*/
 .Detalles{
   display: flex;

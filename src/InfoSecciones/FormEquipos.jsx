@@ -2,9 +2,7 @@ import '../Estilos/Estilos.css'
 import React, { useState, useEffect } from 'react';
 import BotonIcono from '../Estilos/botonIcono';
 
-const API_URL = 'http://localhost:4000/api/registros';
     
-{/*ACCION EQUIPOS*/}
 const FormEquipos = () => {
     const [credenciales, setCredenciales] = useState({
         IDPc: '',

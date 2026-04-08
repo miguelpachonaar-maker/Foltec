@@ -2,6 +2,7 @@ import '../Estilos/Estilos.css'
 import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
 import BotonIcono from '../Estilos/botonIcono';
+import { useEffect } from 'react';
 
 const Usuarios = () => {
     const [resultado, setResultado] = useState ([]);
@@ -13,13 +14,32 @@ const Usuarios = () => {
         setBusqueda(e.target.value);
         setError('');
     }
+    const obtener = async () => {
+        try{
+            const response = await fetch ("http://localhost:4000/api/usuarios");
+            const data = await response.json();
+
+            if(response.ok){
+                setResultado(data);
+            } else{
+                setError("Error al obtener usuarios")
+            }
+        } catch (err){
+            console.error(err);
+            setError("Error al conectar con el servidor")
+        }
+    } 
+
+    useEffect(() => {
+    obtener();
+}, []);
 
     const handleBuscar = async (e) => {
 
         e.preventDefault();
         if (!busqueda.trim()){
-            setError("Ingrese un nombre o usuario para buscar");
-            setResultado([]);
+            setError("");
+            obtener();
             return;
         }
 
@@ -49,7 +69,7 @@ const Usuarios = () => {
 
     return (
         <div className='Busqueda'>
-            <div className='BusquedaCard'>
+ 
                 <form onSubmit={handleBuscar}>
                     <h2>Buscar Usuarios</h2>
 
@@ -70,26 +90,37 @@ const Usuarios = () => {
                 {error && <p style={{ color: "red" }}>{error}</p>}
 
                 </form>
+                <div className="TablaContainer">
+                        <div className="TablaHeader">
+                            <span>Nombre</span>
+                            <span>Estado</span>
+                            <span>Usuario</span>
+                            <span>Area</span>
+                            <span>Cargo</span>
+                            <span>Equipo</span>
+                        </div>
+                </div>
 
-                <div>
+
                     {resultado.map(result => (
-                        <div key={result.id} className='Resultados'>
+                        <div key={result.id} className="TablaFila">
                             <Link to={`/Foltec/Usuarios/${result.IdUsuario}`} style={{ textDecoration: 'none', color: 'black' }}>
-                            <p><strong>Nombre:</strong> {result.NombresApellidos}</p>
+                            <span>{result.NombresApellidos}</span>
                             </Link>
-                            <p><strong>Estado:</strong> {result.Estado}</p>
-                            <p><strong>Usuario:</strong> {result.NombreUsuario}</p>
-                            <p><strong>Area:</strong> {result.Area}</p>
-                            <p><strong>Cargo:</strong> {result.Cargo}</p>
+                            <span className={result.Estado === "Activo" ? "estado-activo" : "estado-inactivo"}>
+                            {result.Estado}
+                            </span>
+                            <span>{result.NombreUsuario}</span>
+                            <span>{result.Area}</span>
+                            <span>{result.Cargo}</span>
+                            <span>{result.Equipo}</span>
                         </div>
                     ))}
 
                     <div className='links'> 
                         <Link to="/Foltec/RegistroUsuarios"> Registrar Personal </Link>
                     </div>
-                </div>
 
-            </div>
         </div>
     );
 };

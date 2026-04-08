@@ -10,6 +10,7 @@ import Usuarios from '../InfoSecciones/Usuarios';
 import DetalleUsuairos from '../InfoSecciones/DetalleUsuarios';
 import Equipos from '../InfoSecciones/Equipos';
 import DetalleEquipos from '../InfoSecciones/DetalleEquipos';
+import Asignacion from '../InfoSecciones/Asignacion';
 
 
 const Index = () => {
@@ -26,6 +27,7 @@ const Index = () => {
           <Route path='Soporte' element ={<SeccionSoporte/>}/>
           <Route path='Usuarios/:id' element ={<DetalleUsuairos/>}/>
           <Route path='Equipos/:id' element ={<DetalleEquipos/>}/>
+          <Route path='Equipos/asignacion' element ={<Asignacion/>}/>
         </Route>
      </Routes>
     </>
