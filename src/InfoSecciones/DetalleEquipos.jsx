@@ -11,6 +11,13 @@ const DetalleEquipos = () => {
     const [estados, setEstados] = useState([]);
     const [marca, setMarca] = useState([]);
     const [equipo, setEquipo] = useState(null);
+    const [mostrarModal, setMostrarModal] = useState(false);
+
+    const [formDevolucion, setFormDevolucion] = useState({
+  fecha: "",
+  EstadoEntrega: "",
+  Observaciones: ""
+});
 
     useEffect(() => {
         if (!id) {
@@ -92,6 +99,47 @@ const DetalleEquipos = () => {
         
 
     }
+};
+const handleDevolver = async () => {
+
+    if (!formDevolucion.fecha) {
+    alert("Debes ingresar la fecha");
+    return;
+  }
+
+  if (!formDevolucion.EstadoEntrega) {
+    alert("Debes seleccionar el estado");
+    return;
+  }
+  
+  try {
+    const response = await fetch("http://localhost:4000/api/devolver", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        IDPc: equipo.IDPc,
+        fecha: formDevolucion.fecha,
+        EstadoEntrega: formDevolucion.EstadoEntrega,
+        Observaciones: formDevolucion.Observaciones
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert(data.mensaje);
+      setMostrarModal(false);
+      window.location.reload();
+    } else {
+      alert(data.error);
+    }
+
+  } catch (error) {
+    console.error(error);
+    alert("Error al devolver equipo");
+  }
 };
 
     if (error) return <p style={{ color: 'red' }}>{error}</p>;
@@ -188,10 +236,54 @@ const DetalleEquipos = () => {
                     {equipo.ASIGNACION === "Sin Usuario" ? (
                     <Link to="/Foltec/Equipos/asignacion"> 
                      <BotonIcono texto="Asignar Equipo" icono="bi-window-plus" /> 
-                     </Link>) : (<Link to="/Foltec/Equipos/asignacion"> 
-                     <BotonIcono texto="Eliminar Asignación" icono="bi-person-x-fill" /> 
-                     </Link>)
+                     </Link>) : (
+                     <BotonIcono 
+                        texto="Devolver Equipo" 
+                        icono="bi-person-x-fill" 
+                        onClick={() => setMostrarModal(true)}
+/> 
+)
                     }
+                    {mostrarModal && (
+                        <div className="modal">
+                        <h3>Devolver equipo {equipo.IDPc}</h3>
+
+                            <label>Fecha devolución</label>
+                            <input
+                            type="date"
+                             value={formDevolucion.fecha}
+                            onChange={(e) =>
+                            setFormDevolucion({ ...formDevolucion, fecha: e.target.value })
+                            }
+                             />
+
+                            <label>Estado entrega</label>
+                            <select
+                            value={formDevolucion.EstadoEntrega}
+                            onChange={(e) =>
+                            setFormDevolucion({ ...formDevolucion, EstadoEntrega: e.target.value })
+                            }
+                            >
+                            <option value="">Seleccione estado</option>
+                            {estados.map((estado)=>(
+                            <option key={estado.IdEstado} 
+                            value={estado.IdEstado}>{estado.TipoEstado}</option>
+                            ))}
+                             </select>
+
+                            <label>Observaciones</label>
+                            <input
+                            type="text"
+                            value={formDevolucion.Observaciones}
+                            onChange={(e) =>
+                            setFormDevolucion({ ...formDevolucion, Observaciones: e.target.value })
+                             }
+                                />
+
+                            <button onClick={handleDevolver}>Confirmar</button>
+                            <button onClick={() => setMostrarModal(false)}>Cancelar</button>
+                            </div>
+                        )}
                     
 
                 
@@ -202,6 +294,8 @@ const DetalleEquipos = () => {
                 </div>
                 {mensaje && <p style={{ color: 'green' }}>{mensaje}</p>}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
+
+
             </div>
         </div>
     );

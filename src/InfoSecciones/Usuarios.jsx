@@ -117,9 +117,14 @@ const Usuarios = () => {
                         </div>
                     ))}
 
-                    <div className='links'> 
-                        <Link to="/Foltec/RegistroUsuarios"> Registrar Personal </Link>
-                    </div>
+                    <div className='acciones'> 
+                            <Link to="/Foltec/RegistroEquipos"> 
+                            <BotonIcono texto="Registrar" icono="bi-folder-plus" /> 
+                            </Link>
+                            <Link to="/Foltec/Equipos/asignacion"> 
+                            <BotonIcono texto="Asignar Equipo" icono="bi-window-plus" /> 
+                            </Link>
+                        </div>
 
         </div>
     );
