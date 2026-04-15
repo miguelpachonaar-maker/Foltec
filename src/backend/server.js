@@ -326,6 +326,18 @@ app.post("/api/login", async (req, res) => {
 
     if (result.rows.length > 0) {
       const usuario = result.rows[0];
+      console.log("Password BD:", usuario.Contraseña);
+console.log("Ingresado:", Contraseña);
+      const Valido = await bcrypt.compare(
+        Contraseña,
+        usuario.Contraseña
+      );
+
+      if(!Valido){
+        return res.status(401).json({
+        mensaje: "Usuario o contraseña incorrectos"
+      });
+      }
 
 
       res.json({
