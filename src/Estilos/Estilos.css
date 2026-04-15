@@ -363,13 +363,30 @@ tbody tr:hover {
 
 .acciones {
   display: flex;
-  gap: 100px; 
+  gap: 20px; 
+  align-items: center;
   margin-top: 10px;
   justify-content: center;
+}
+.acciones button {
+  background-color: rgb(1, 21, 172);
+  color: white;
+  height: 50px;
+  width: 250px; 
+  border-radius: 10px;
+  border: none;
+  transition: all 0.3s ease;
+
+}
+
+.acciones button:hover{
+  background: #0056b3;
+  transform: scale(1.05);
 }
 .acciones a {
   text-decoration: none;
   color: #0d47a1;
+  display: flex;
   font-weight: 500;
 }
 
@@ -507,10 +524,10 @@ tbody tr:hover {
   width: 250px; 
   border-radius: 10px;
   border: none;
-  flex: 1;
-  justify-self: center;
-   transition: all 0.3s ease;
+  transition: all 0.3s ease;
+
 }
+
 .Busqueda button:hover{
   background: #0056b3;
   transform: scale(1.05);

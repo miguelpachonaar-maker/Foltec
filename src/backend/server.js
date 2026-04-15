@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import pkg from "pg";
+import ExcelJS from "exceljs";
+import bcrypt from 'bcrypt';
+
 const { Pool } = pkg;
 
 
@@ -16,10 +19,119 @@ const pool = new Pool({
   }
 });
 
+app.get("/reporte", async (req, res) =>{
+
+try{
+  const asignados = await pool.query( 
+    `SELECT u."NombreUsuario", u."NombresApellidos", c."IDPc", c."Serial", a."FechaAsignacion" FROM "Asignacion" a JOIN "Usuarios" u ON  a."IdUsuario" = u."IdUsuario" JOIN "Computadoras" c ON a."IDPc" = c."IDPc" WHERE a."FechaDevolucion" IS NULL` 
+  );
+
+  const devueltos = await pool.query (
+    `SELECT u."NombreUsuario", u."NombresApellidos", c."IDPc", c."Serial", d."FechaDevolucion" FROM "Devolucion" d JOIN "Usuarios" u ON  d."IdUsuario" = u."IdUsuario" JOIN "Computadoras" c ON d."IDPc" = c."IDPc"`     
+  );
+
+  const usuarios = await pool.query (
+    `SELECT * FROM "Usuarios"`
+  );
+
+  const equipos = await pool.query (
+    `SELECT * FROM "Computadoras"`
+  );
+
+  const Libro = new ExcelJS.Workbook();
+
+  const HAsignados = Libro.addWorksheet('Asignados');
+  HAsignados.columns = [
+    {header: 'Usuario', key: 'NombreUsuario', width: 20},
+    {header: 'Nombre Empleado', key: 'NombresApellidos', width: 30},
+    {header: 'ID PC', key: 'IDPc', width: 20},
+    {header: 'Serial PC', key: 'Serial', width: 20},
+    {header: 'Fecha Asignación', key: 'FechaAsignacion', width: 20},
+  ];
+  asignados.rows.forEach(row => HAsignados.addRow(row));
+
+  const HDevueltos = Libro.addWorksheet('Devoluciones');
+  HDevueltos.columns = [
+    {header: 'Usuario', key: 'NombreUsuario', width: 20},
+    {header: 'Nombre Empleado', key: 'NombresApellidos', width: 30},
+    {header: 'ID PC', key: 'IDPc', width: 20},
+    {header: 'Serial PC', key: 'Serial', width: 20},
+    {header: 'Fecha Devolución', key: 'FechaDevolucion', width: 20},
+  ];
+  devueltos.rows.forEach(row => HDevueltos.addRow(row));
+
+  const HUsuarios = Libro.addWorksheet('Usuarios');
+  HUsuarios.columns = [
+    {header: 'Usuario', key: 'NombreUsuario', width: 20},
+    {header: 'Nombre Empleado', key: 'NombresApellidos', width: 30},
+    {header: 'Tipo Documento', key: 'TipoDocumento', width: 20},
+    {header: 'Documento', key: 'NumeroDocumento', width: 20},
+    {header: 'Correo', key: 'Correo', width: 30},
+    {header: 'Contacto', key: 'Contacto', width: 20},
+    {header: 'Cargo', key: 'Cargo', width: 20},
+    {header: 'Area', key: 'Area', width: 20},
+    {header: 'Estado', key: 'Estado', width: 20},
+  ];
+  usuarios.rows.forEach(row => HUsuarios.addRow(row));
+
+  const HComputadoras = Libro.addWorksheet('Equipos');
+  HComputadoras.columns = [
+    {header: 'ID PC', key: 'IDPc', width: 20},
+    {header: 'Serial PC', key: 'Serial', width: 20},
+    {header: 'MAC PC', key: 'MAC', width: 20},
+    {header: 'Tipo PC', key: 'TipoPc', width: 20},
+    {header: 'Marca PC', key: 'Marca', width: 20},
+    {header: 'Descripcion PC', key: 'Descripcion', width: 20},
+    {header: 'Estado', key: 'Estado', width: 20},
+  ];
+  equipos.rows.forEach(row => HComputadoras.addRow(row));
+
+  [HAsignados, HDevueltos, HUsuarios, HComputadoras].forEach ((ws) => {
+    const Filas = ws.rowCount;
+    const Columnas = ws.columnCount;
+
+    if (Filas > 1 && Columnas > 0) {
+  const lastColumnLetter = ws.getColumn(Columnas).letter;
+      ws.addTable({
+        name: `Tabla_${ws.name}`,
+        ref: 'A1',
+        headerRow: true,
+        style: {
+          theme:'TableStyleMedium9',
+          showRowStripes: true,
+        },
+        columns: ws.columns.map(col => ({
+          name: col.header
+        })),
+        rows : ws.getRows(2, Filas -1).map(row =>
+          row.values.slice(1)
+        ),
+        });
+      }
+  });
+
+  res.setHeader(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  );
+  res.setHeader(
+    'Content-Disposition',
+    'attachment; filename=Reporte.xlsx'
+  );
+
+  await Libro.xlsx.write(res);
+  res.end();
+} catch (error){
+  console.error(error);
+  res.status(500).send('Error generando el reporte');
+}
+
+})
+
 app.post ("/api/devolver", async (req, res) =>{
   const { IDPc, EstadoEntrega, fecha, Observaciones, } = req.body;
   try {
-    // 🔍 1. Obtener asignación activa
+
     const asignacion = await pool.query(
       `SELECT * FROM "Asignacion"
        WHERE "IDPc" = $1 AND "FechaDevolucion" IS NULL`,
@@ -80,13 +192,15 @@ app.post ("/api/asignar", async (req, res) =>{
 })
 app.post("/api/personal", async (req, res) => {
 
-  const {NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, Contraseña} = req.body;
+  
   
   try {
+    const {NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, Contraseña} = req.body;
+  const hash = await bcrypt.hash(Contraseña, 10);
 
     await pool.query (
       'INSERT INTO "Usuarios" ("NombresApellidos", "TipoDocumento","NumeroDocumento", "Contacto", "Estado", "Correo", "Area", "Cargo", "NombreUsuario", "Contraseña") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
-      [NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, Contraseña]
+      [NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, hash]
     );
 
 
@@ -251,7 +365,7 @@ app.get("/api/equipos/buscar", async (req, res) => {
     if (!q) return res.status(400).json ({error: "Falta información de busqueda"});
 
     const result = await pool.query(
-      'SELECT * FROM "Computadoras" WHERE "IDPc" ILIKE $1 OR "Serial" ILIKE $1',
+      `SELECT c.*, CASE  WHEN a."IDPc" IS NULL THEN 'Disponible' ELSE 'Asignado' END AS "Asignacion" FROM "Computadoras" c LEFT JOIN "Asignacion" a ON c."IDPc" =  a."IDPc" AND a."FechaDevolucion" IS NULL WHERE c."IDPc" ILIKE $1 OR c."Serial" ILIKE $1`,
       [`%${q}%`]
     );
 
@@ -267,7 +381,8 @@ app.get("/api/buscar", async (req, res) => {
     if (!q) return res.status(400).json ({error: "Falta información de busqueda"});
 
     const result = await pool.query(
-      `SELECT * FROM "Usuarios" WHERE "NombresApellidos" ILIKE $1 OR "NombreUsuario" ILIKE $1 `,
+      `SELECT u.*, CASE WHEN c."IDPc" IS NULL THEN 'Sin Equipo' ELSE c."IDPc" END AS "Equipo" FROM "Usuarios" u LEFT JOIN "Asignacion" a ON u."IdUsuario" = a."IdUsuario" AND a."FechaDevolucion" IS NULL
+ LEFT JOIN "Computadoras" c ON a."IDPc" = c."IDPc" WHERE u."NombresApellidos" ILIKE $1 OR u."NombreUsuario" ILIKE $1 `,
       [`%${q}%`]
     );
 
@@ -277,24 +392,8 @@ app.get("/api/buscar", async (req, res) => {
     res.status(500).json({error: "Error al buscar el personal"});
   }
 });
-app.post("/api/personal", async (req, res) => {
-
-  const {NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, Contraseña} = req.body;
-  
-  try {
-
-    await pool.query (
-      'INSERT INTO "Usuarios" ("NombresApellidos", "TipoDocumento","NumeroDocumento", "Contacto", "Estado", "Correo", "Area", "Cargo", "NombreUsuario", "Contraseña") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
-      [NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, Contraseña]
-    );
 
 
-    res.json ({mensaje: "Personal registrado exitosamente"});
-  } catch (error){
-    console.error(error);
-    res.status(500).json({ error: "Error al registrar datos"});
-  }
-});
 app.post("/api/equipos", async (req, res)=>{
   const {IDPc, MAC, Serial, Marca, Descripcion, Estado, TipoPc} = req.body;
 
@@ -320,14 +419,17 @@ app.post("/api/login", async (req, res) => {
   try {
 
     const result = await pool.query(
-      'SELECT * FROM "Usuarios" WHERE "NombreUsuario"=$1 AND "Contraseña"=$2',
-      [Usuario, Contraseña]
+      'SELECT * FROM "Usuarios" WHERE "NombreUsuario"=$1',
+      [Usuario]
     );
 
-    if (result.rows.length > 0) {
+    if (result.rows.length === 0) {
+      return res.status(401).json({
+        mensaje: "Usuario o contraseña incorrectos"
+      });
+    }
+
       const usuario = result.rows[0];
-      console.log("Password BD:", usuario.Contraseña);
-console.log("Ingresado:", Contraseña);
       const Valido = await bcrypt.compare(
         Contraseña,
         usuario.Contraseña
@@ -346,13 +448,6 @@ console.log("Ingresado:", Contraseña);
         nombre: usuario.NombreUsuario
       });
 
-    } else {
-
-      res.status(401).json({
-        mensaje: "Usuario o contraseña incorrectos"
-      });
-
-    }
 
   } catch (error) {
 
