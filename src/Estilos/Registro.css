@@ -1,0 +1,107 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #ffffff; 
+}
+
+.contenedor {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+    align-items:start;
+    min-height: 100vh;
+}
+.contenedor-boton{
+    text-align: center;
+}
+
+.formulario {
+    width: 100%;
+    max-width: 400px;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0, 0.2);
+    background-color: white;
+    border-top: 5px solid #ffb703;
+}
+
+.formulario h2{
+    color: #8ecae6; 
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+}
+
+.input-grupo {
+    margin-bottom: 20px;
+}
+
+.label {
+    display: flex;
+    align-items: center; 
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+    gap: 10px;
+}
+
+.input {
+    width: 50%;
+    padding: 8px;
+    border: 1px solid #a1adb8;
+    border-radius: 20px;
+    background-color: #dbe4eb;
+    box-sizing: border-box; 
+    transition: border-color 0.3s;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 15px; 
+}
+
+input:focus{
+    border-color: #007bff;
+    outline: none;
+}
+
+.boton-registro {
+    background-color: #1e3ce6;
+    color: white;
+    padding: 12px 40px;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    text-align: center;
+    width: fit-content; 
+    border-radius: 25px; 
+    display: block;      
+    display: flex;           
+    justify-content: center; 
+    align-items: center;  
+    margin: 0 auto;     
+}
+button:hover {
+  background-color: red;
+  transition: 0.5s;
+}
+
+password-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+toogle-password{
+position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  color: #333;
+  user-select: none;
+  transition: color 0.3s ease;
+}
+
+toogle-password:hover{
+    color: #000;
+}
