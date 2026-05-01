@@ -20,6 +20,8 @@ function RootLayout(){
     const cerrarSesion = () => {
         localStorage.removeItem("usuarioID");
         localStorage.removeItem("nombreUsuario");
+        localStorage.removeItem("permisosUsuario");
+        localStorage.removeItem("auth");
 
         alert("Sesión Cerrada");
         navigate("/");

@@ -4,11 +4,22 @@ import { Link } from 'react-router-dom';
 import BotonIcono from '../Estilos/botonIcono';
 import { useEffect } from 'react';
 
+const puedeRegistrarUsuarios = () => {
+    try {
+        const raw = localStorage.getItem("permisosUsuario");
+        const permisos = raw ? JSON.parse(raw) : [];
+        return Array.isArray(permisos) && permisos.includes("usuarios.registrar");
+    } catch {
+        return false;
+    }
+};
+
 const Usuarios = () => {
     const [resultado, setResultado] = useState ([]);
     const [busqueda, setBusqueda] = useState ("");
     const [error, setError] = useState(''); 
     const [mensaje, setMensaje] = useState('');
+    const puedeRegistrar = puedeRegistrarUsuarios();
 
     const handleChange = (e) => {
         setBusqueda(e.target.value);
@@ -112,6 +123,7 @@ const Usuarios = () => {
                             <span>Nombre</span>
                             <span>Estado</span>
                             <span>Usuario</span>
+                            <span>Rol</span>
                             <span>Area</span>
                             <span>Cargo</span>
                             <span>Equipo</span>
@@ -120,7 +132,7 @@ const Usuarios = () => {
 
 
                     {resultado.map(result => (
-                        <div key={result.id} className="TablaFila">
+                        <div key={result.IdUsuario} className="TablaFila">
                             <Link to={`/Foltec/Usuarios/${result.IdUsuario}`} style={{ textDecoration: 'none', color: 'black' }}>
                             <span>{result.NombresApellidos}</span>
                             </Link>
@@ -128,6 +140,7 @@ const Usuarios = () => {
                             {result.Estado}
                             </span>
                             <span>{result.NombreUsuario}</span>
+                            <span>{result.NombreRol ?? "—"}</span>
                             <span>{result.Area}</span>
                             <span>{result.Cargo}</span>
                             <span>{result.Equipo}</span>
@@ -136,9 +149,11 @@ const Usuarios = () => {
 
                     <div className='acciones'> 
                             <BotonIcono texto="Reporte" icono="bi-download" onClick={reporte} />
+                            {puedeRegistrar && (
                             <Link to="/Foltec/RegistroUsuarios"> 
                             <BotonIcono texto="Registrar" icono="bi-folder-plus" /> 
                             </Link>
+                            )}
                             <Link to="/Foltec/Equipos/asignacion"> 
                             <BotonIcono texto="Asignar Equipo" icono="bi-window-plus" /> 
                             </Link>

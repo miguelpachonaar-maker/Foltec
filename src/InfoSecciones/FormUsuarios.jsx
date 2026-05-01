@@ -1,6 +1,6 @@
 import '../Estilos/Estilos.css'
 import React, {useState, useEffect} from 'react';
-import { data, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import BotonIcono from '../Estilos/botonIcono';
 
 
@@ -12,6 +12,7 @@ const FormUsuarios = () => {
         Celular:'',
         Estado: '',
         Correo:'',
+        IdRol: '',
         Area:'',
         Cargo: '',
         Usuario: '',
@@ -23,6 +24,7 @@ const FormUsuarios = () => {
      const [areas, setAreas] = useState([]);
      const [estados, setEstados] = useState([]);
      const [documento, setDocumeto] = useState([]);
+     const [roles, setRoles] = useState([]);
 
     
      const handleChange = (e) => {
@@ -34,16 +36,32 @@ const FormUsuarios = () => {
      };
 
      useEffect(() => {
-        fetch ("http://localhost:4000/api/select")
-        .then ((res) => res.json())
-        .then ((data) => {
-            setAreas(data.areas);
-            setEstados(data.estados);
-            setDocumeto(data.documento);
-        })
-        
-        .catch ((error) => console.error("Error: ", error));
-    }, []);
+        const raw = localStorage.getItem("permisosUsuario");
+        let puedeRegistrar = false;
+        try {
+            const permisos = raw ? JSON.parse(raw) : [];
+            puedeRegistrar =
+                Array.isArray(permisos) && permisos.includes("usuarios.registrar");
+        } catch {
+            puedeRegistrar = false;
+        }
+        if (!puedeRegistrar) {
+            navegar("/Foltec/Usuarios");
+            return;
+        }
+
+        Promise.all([
+            fetch("http://localhost:4000/api/select").then((res) => res.json()),
+            fetch("http://localhost:4000/api/roles").then((res) => res.json()),
+        ])
+            .then(([data, rolesData]) => {
+                setAreas(data.areas);
+                setEstados(data.estados);
+                setDocumeto(data.documento);
+                setRoles(Array.isArray(rolesData) ? rolesData : []);
+            })
+            .catch((err) => console.error("Error: ", err));
+    }, [navegar]);
      const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -54,7 +72,10 @@ const FormUsuarios = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(credenciales),
+                body: JSON.stringify({
+                    ...credenciales,
+                    IdUsuarioSesion: localStorage.getItem("usuarioID"),
+                }),
             });
             const data = await response.json();
             if(response.ok){
@@ -70,6 +91,7 @@ const FormUsuarios = () => {
                     Contacto:'',
                     Estado: '',
                     Correo:'',
+                    IdRol: '',
                     Area:'',
                     Cargo: '',
                     NombreUsuario: '',
@@ -173,6 +195,23 @@ const FormUsuarios = () => {
                     onChange={handleChange}
                     required
                     />
+                </div>
+                <div className='CamposFull'>
+                    <label>Rol del usuario</label>
+                    <select
+                        name="IdRol"
+                        id="IdRol"
+                        value={credenciales.IdRol}
+                        onChange={handleChange}
+                        required
+                    >
+                        <option value="">Seleccione un rol</option>
+                        {roles.map((rol) => (
+                            <option key={rol.IdRol} value={rol.IdRol}>
+                                {rol.Nombre}
+                            </option>
+                        ))}
+                    </select>
                 </div>
                 <div>
                     <label>Area</label>

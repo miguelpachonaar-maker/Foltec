@@ -2,21 +2,33 @@ import express from "express";
 import cors from "cors";
 import pkg from "pg";
 import ExcelJS from "exceljs";
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 const { Pool } = pkg;
-
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+if (!process.env.DATABASE_URL) {
+  console.error(
+    "Falta DATABASE_URL. Crea un archivo .env en la raíz del proyecto (o en src/backend) con tu cadena de Neon."
+  );
+}
+
 const pool = new Pool({
-  connectionString: "postgresql://neondb_owner:npg_ytMd4jev1HZz@ep-shiny-wave-a8ahba2g-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&channel_binding=require",
+  connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+  },
 });
 
 app.get("/reporte", async (req, res) =>{
@@ -191,23 +203,85 @@ app.post ("/api/asignar", async (req, res) =>{
   }
 })
 app.post("/api/personal", async (req, res) => {
-
-  
-  
   try {
-    const {NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, Contraseña} = req.body;
-  const hash = await bcrypt.hash(Contraseña, 10);
+    const {
+      NombresApellidos,
+      TipoDocumento,
+      NumeroDocumento,
+      Contacto,
+      Estado,
+      Correo,
+      Area,
+      Cargo,
+      NombreUsuario,
+      Contraseña,
+      IdRol,
+      IdUsuarioSesion,
+    } = req.body;
 
-    await pool.query (
-      'INSERT INTO "Usuarios" ("NombresApellidos", "TipoDocumento","NumeroDocumento", "Contacto", "Estado", "Correo", "Area", "Cargo", "NombreUsuario", "Contraseña") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
-      [NombresApellidos, TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, hash]
+    const idRolNum = IdRol != null && IdRol !== "" ? Number(IdRol) : NaN;
+    if (!Number.isInteger(idRolNum)) {
+      return res.status(400).json({ error: "Debe seleccionar un rol válido" });
+    }
+
+    const idSesion = IdUsuarioSesion != null && IdUsuarioSesion !== ""
+      ? Number(IdUsuarioSesion)
+      : NaN;
+    if (!Number.isInteger(idSesion)) {
+      return res.status(400).json({ error: "Sesión no válida para registrar personal" });
+    }
+
+    const puedeRegistrar = await pool.query(
+      `SELECT 1 FROM "Usuarios" u
+       JOIN "RolPermiso" rp ON u."IdRol" = rp."IdRol"
+       JOIN "Permiso" p ON rp."IdPermiso" = p."IdPermiso"
+       WHERE u."IdUsuario" = $1 AND p."Codigo" = 'usuarios.registrar'`,
+      [idSesion]
+    );
+    if (puedeRegistrar.rows.length === 0) {
+      return res.status(403).json({
+        error: "No tiene permiso para registrar usuarios",
+      });
+    }
+
+    const hash = await bcrypt.hash(Contraseña, 10);
+
+    await pool.query(
+      `INSERT INTO "Usuarios" (
+        "NombresApellidos", "TipoDocumento", "NumeroDocumento", "Contacto", "Estado",
+        "Correo", "Area", "Cargo", "NombreUsuario", "Contraseña", "IdRol"
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+      [
+        NombresApellidos,
+        TipoDocumento,
+        NumeroDocumento,
+        Contacto,
+        Estado,
+        Correo,
+        Area,
+        Cargo,
+        NombreUsuario,
+        hash,
+        idRolNum,
+      ]
     );
 
-
-    res.json ({mensaje: "Personal registrado exitosamente"});
-  } catch (error){
+    res.json({ mensaje: "Personal registrado exitosamente" });
+  } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error al registrar datos"});
+    res.status(500).json({ error: "Error al registrar datos" });
+  }
+});
+
+app.get("/api/roles", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT "IdRol", "Nombre", "Descripcion" FROM "Rol" ORDER BY "Nombre"`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error al obtener roles" });
   }
 });
 
@@ -253,8 +327,12 @@ app.get("/api/equipos", async (req, res)=> {
 app.get("/api/usuarios", async (req, res)=> {
   try{
     const result = await pool.query(
-        `SELECT u.*, CASE WHEN c."IDPc" IS NULL THEN 'Sin Equipo' ELSE c."IDPc" END AS "Equipo" FROM "Usuarios" u LEFT JOIN "Asignacion" a ON u."IdUsuario" = a."IdUsuario" AND a."FechaDevolucion" IS NULL
- LEFT JOIN "Computadoras" c ON a."IDPc" = c."IDPc"`
+        `SELECT u.*, CASE WHEN c."IDPc" IS NULL THEN 'Sin Equipo' ELSE c."IDPc" END AS "Equipo",
+        r."Nombre" AS "NombreRol"
+        FROM "Usuarios" u
+        LEFT JOIN "Asignacion" a ON u."IdUsuario" = a."IdUsuario" AND a."FechaDevolucion" IS NULL
+        LEFT JOIN "Computadoras" c ON a."IDPc" = c."IDPc"
+        LEFT JOIN "Rol" r ON u."IdRol" = r."IdRol"`
     );
     res.json(result.rows);
   }catch (err){
@@ -381,8 +459,13 @@ app.get("/api/buscar", async (req, res) => {
     if (!q) return res.status(400).json ({error: "Falta información de busqueda"});
 
     const result = await pool.query(
-      `SELECT u.*, CASE WHEN c."IDPc" IS NULL THEN 'Sin Equipo' ELSE c."IDPc" END AS "Equipo" FROM "Usuarios" u LEFT JOIN "Asignacion" a ON u."IdUsuario" = a."IdUsuario" AND a."FechaDevolucion" IS NULL
- LEFT JOIN "Computadoras" c ON a."IDPc" = c."IDPc" WHERE u."NombresApellidos" ILIKE $1 OR u."NombreUsuario" ILIKE $1 `,
+      `SELECT u.*, CASE WHEN c."IDPc" IS NULL THEN 'Sin Equipo' ELSE c."IDPc" END AS "Equipo",
+      r."Nombre" AS "NombreRol"
+      FROM "Usuarios" u
+      LEFT JOIN "Asignacion" a ON u."IdUsuario" = a."IdUsuario" AND a."FechaDevolucion" IS NULL
+      LEFT JOIN "Computadoras" c ON a."IDPc" = c."IDPc"
+      LEFT JOIN "Rol" r ON u."IdRol" = r."IdRol"
+      WHERE u."NombresApellidos" ILIKE $1 OR u."NombreUsuario" ILIKE $1 `,
       [`%${q}%`]
     );
 
@@ -413,52 +496,64 @@ app.post("/api/equipos", async (req, res)=>{
 });
 
 app.post("/api/login", async (req, res) => {
-
   const { Usuario, Contraseña } = req.body;
 
   try {
-
     const result = await pool.query(
-      'SELECT * FROM "Usuarios" WHERE "NombreUsuario"=$1',
+      `SELECT u.*,
+        COALESCE(
+          (SELECT json_agg(p."Codigo")
+           FROM "RolPermiso" rp
+           JOIN "Permiso" p ON rp."IdPermiso" = p."IdPermiso"
+           WHERE rp."IdRol" = u."IdRol"),
+          '[]'::json
+        ) AS permisos
+       FROM "Usuarios" u
+       WHERE u."NombreUsuario"=$1`,
       [Usuario]
     );
 
     if (result.rows.length === 0) {
       return res.status(401).json({
-        mensaje: "Usuario o contraseña incorrectos"
+        mensaje: "Usuario o contraseña incorrectos",
       });
     }
 
-      const usuario = result.rows[0];
-      const Valido = await bcrypt.compare(
-        Contraseña,
-        usuario.Contraseña
-      );
+    const usuario = result.rows[0];
+    const Valido = await bcrypt.compare(Contraseña, usuario.Contraseña);
 
-      if(!Valido){
-        return res.status(401).json({
-        mensaje: "Usuario o contraseña incorrectos"
+    if (!Valido) {
+      return res.status(401).json({
+        mensaje: "Usuario o contraseña incorrectos",
       });
+    }
+
+    let permisos = usuario.permisos;
+    if (typeof permisos === "string") {
+      try {
+        permisos = JSON.parse(permisos);
+      } catch {
+        permisos = [];
       }
+    }
+    if (!Array.isArray(permisos)) {
+      permisos = [];
+    }
 
-
-      res.json({
-        mensaje: "Login exitoso",
-        usuarioID: usuario.IdUsuario,
-        nombre: usuario.NombreUsuario
-      });
-
-
+    res.json({
+      mensaje: "Login exitoso",
+      usuarioID: usuario.IdUsuario,
+      nombre: usuario.NombreUsuario,
+      idRol: usuario.IdRol,
+      permisos,
+    });
   } catch (error) {
-
     console.error(error);
 
     res.status(500).json({
-      mensaje: "Error del servidor"
+      mensaje: "Error del servidor",
     });
-
   }
-
 });
 
 app.listen(4000, () => {
