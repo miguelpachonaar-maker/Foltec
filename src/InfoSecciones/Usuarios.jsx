@@ -3,23 +3,14 @@ import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
 import BotonIcono from '../Estilos/botonIcono';
 import { useEffect } from 'react';
-
-const puedeRegistrarUsuarios = () => {
-    try {
-        const raw = localStorage.getItem("permisosUsuario");
-        const permisos = raw ? JSON.parse(raw) : [];
-        return Array.isArray(permisos) && permisos.includes("usuarios.registrar");
-    } catch {
-        return false;
-    }
-};
+import { usePermisos } from '../hooks/usePermisos';
 
 const Usuarios = () => {
     const [resultado, setResultado] = useState ([]);
     const [busqueda, setBusqueda] = useState ("");
     const [error, setError] = useState(''); 
     const [mensaje, setMensaje] = useState('');
-    const puedeRegistrar = puedeRegistrarUsuarios();
+    const { tiene } = usePermisos();
 
     const handleChange = (e) => {
         setBusqueda(e.target.value);
@@ -45,9 +36,16 @@ const Usuarios = () => {
     obtener();
 }, []);
     const reporte = async () =>{
+        const uid = localStorage.getItem("usuarioID");
         try{
-            const response = await fetch ("http://localhost:4000/reporte");
-            
+            const response = await fetch (
+                `http://localhost:4000/reporte?idSesion=${encodeURIComponent(uid)}`
+            );
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                setError(err.error || "No se pudo generar el reporte");
+                return;
+            }
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
 
@@ -140,7 +138,7 @@ const Usuarios = () => {
                             {result.Estado}
                             </span>
                             <span>{result.NombreUsuario}</span>
-                            <span>{result.NombreRol ?? "—"}</span>
+                            <span>{result.NombreRol ?? result.nombrerol ?? "—"}</span>
                             <span>{result.Area}</span>
                             <span>{result.Cargo}</span>
                             <span>{result.Equipo}</span>
@@ -148,14 +146,37 @@ const Usuarios = () => {
                     ))}
 
                     <div className='acciones'> 
-                            <BotonIcono texto="Reporte" icono="bi-download" onClick={reporte} />
-                            {puedeRegistrar && (
-                            <Link to="/Foltec/RegistroUsuarios"> 
-                            <BotonIcono texto="Registrar" icono="bi-folder-plus" /> 
+                            <BotonIcono
+                                texto="Reporte"
+                                icono="bi-download"
+                                onClick={reporte}
+                                disabled={!tiene("reportes.exportar")}
+                            />
+                            <Link
+                                to="/Foltec/RegistroUsuarios"
+                                style={{
+                                    opacity: tiene("usuarios.registrar") ? 1 : 0.55,
+                                    pointerEvents: tiene("usuarios.registrar") ? "auto" : "none",
+                                }}
+                            >
+                            <BotonIcono
+                                texto="Registrar"
+                                icono="bi-folder-plus"
+                                disabled={!tiene("usuarios.registrar")}
+                            />
                             </Link>
-                            )}
-                            <Link to="/Foltec/Equipos/asignacion"> 
-                            <BotonIcono texto="Asignar Equipo" icono="bi-window-plus" /> 
+                            <Link
+                                to="/Foltec/Equipos/asignacion"
+                                style={{
+                                    opacity: tiene("equipos.asignar") ? 1 : 0.55,
+                                    pointerEvents: tiene("equipos.asignar") ? "auto" : "none",
+                                }}
+                            >
+                            <BotonIcono
+                                texto="Asignar Equipo"
+                                icono="bi-window-plus"
+                                disabled={!tiene("equipos.asignar")}
+                            />
                             </Link>
                         </div>
 

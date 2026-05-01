@@ -1,6 +1,8 @@
 import '../Estilos/Estilos.css'
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import BotonIcono from '../Estilos/botonIcono';
+import { usePermisos } from '../hooks/usePermisos';
 
     
 const FormEquipos = () => {
@@ -18,8 +20,15 @@ const FormEquipos = () => {
     const [marca, setMarca] = useState([]);
     const [error, setError] = useState(''); 
     const [mensaje, setMensaje] = useState('');
+    const navegar = useNavigate();
+    const { permisos, cargando } = usePermisos();
 
         useEffect(() => {
+        if (cargando) return;
+        if (!Array.isArray(permisos) || !permisos.includes("equipos.registrar")) {
+            navegar("/Foltec/Equipos");
+            return;
+        }
         fetch ("http://localhost:4000/api/select")
         .then ((res) => res.json())
         .then ((data) => {
@@ -28,7 +37,7 @@ const FormEquipos = () => {
         })
                  
        .catch ((error) => console.error("Error: ", error));
-    }, []);
+    }, [cargando, permisos, navegar]);
 
     const handleChange = (e) => {
         const {name, value} =e.target;
@@ -63,7 +72,10 @@ const FormEquipos = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(credenciales),
+                body: JSON.stringify({
+                    ...credenciales,
+                    IdUsuarioSesion: localStorage.getItem("usuarioID"),
+                }),
             });
             const data = await response.json();
             if(response.ok){

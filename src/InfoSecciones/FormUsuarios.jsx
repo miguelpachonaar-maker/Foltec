@@ -2,6 +2,7 @@ import '../Estilos/Estilos.css'
 import React, {useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import BotonIcono from '../Estilos/botonIcono';
+import { usePermisos } from '../hooks/usePermisos';
 
 
 const FormUsuarios = () => {
@@ -25,6 +26,7 @@ const FormUsuarios = () => {
      const [estados, setEstados] = useState([]);
      const [documento, setDocumeto] = useState([]);
      const [roles, setRoles] = useState([]);
+     const { permisos, cargando } = usePermisos();
 
     
      const handleChange = (e) => {
@@ -36,16 +38,8 @@ const FormUsuarios = () => {
      };
 
      useEffect(() => {
-        const raw = localStorage.getItem("permisosUsuario");
-        let puedeRegistrar = false;
-        try {
-            const permisos = raw ? JSON.parse(raw) : [];
-            puedeRegistrar =
-                Array.isArray(permisos) && permisos.includes("usuarios.registrar");
-        } catch {
-            puedeRegistrar = false;
-        }
-        if (!puedeRegistrar) {
+        if (cargando) return;
+        if (!Array.isArray(permisos) || !permisos.includes("usuarios.registrar")) {
             navegar("/Foltec/Usuarios");
             return;
         }
@@ -61,7 +55,7 @@ const FormUsuarios = () => {
                 setRoles(Array.isArray(rolesData) ? rolesData : []);
             })
             .catch((err) => console.error("Error: ", err));
-    }, [navegar]);
+    }, [navegar, cargando, permisos]);
      const handleSubmit = async (e) => {
         e.preventDefault();
 

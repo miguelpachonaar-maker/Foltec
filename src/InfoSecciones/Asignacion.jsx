@@ -1,6 +1,8 @@
 import '../Estilos/Estilos.css'
 import BotonIcono from '../Estilos/botonIcono';
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { usePermisos } from '../hooks/usePermisos';
 
 const Asignacion =() => {
     const [IdUsuario, setIdUsuario] = useState(null);
@@ -12,6 +14,15 @@ const Asignacion =() => {
     const [fecha, setFecha] = useState ("");
     const [error, setError] = useState(''); 
     const [mensaje, setMensaje] = useState('');
+    const navegar = useNavigate();
+    const { permisos, cargando } = usePermisos();
+
+    useEffect(() => {
+        if (cargando) return;
+        if (!Array.isArray(permisos) || !permisos.includes("equipos.asignar")) {
+            navegar("/Foltec/Equipos");
+        }
+    }, [cargando, permisos, navegar]);
     
     const buscarUsuario = async () => {
         if (!cedula) return;
@@ -58,6 +69,7 @@ const Asignacion =() => {
                     IDPc: idpc,
                     Observaciones: Observaciones,
                     fecha: fecha,
+                    IdUsuarioSesion: localStorage.getItem("usuarioID"),
             }),
             });
             const data = await response.json();

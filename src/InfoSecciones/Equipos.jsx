@@ -4,12 +4,14 @@ import { Link } from 'react-router-dom';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import BotonIcono from '../Estilos/botonIcono';
 import { useEffect } from 'react';
+import { usePermisos } from '../hooks/usePermisos';
 
 const Equipos =() =>{
     const [resultado, setResultado] = useState ([]);
         const [busqueda, setBusqueda] = useState ("");
         const [error, setError] = useState(''); 
         const [mensaje, setMensaje] = useState('');
+        const { tiene } = usePermisos();
     
         const handleChange = (e) => {
             setBusqueda(e.target.value);
@@ -35,9 +37,16 @@ const Equipos =() =>{
         }, []);
         
         const reporte = async () =>{
+        const uid = localStorage.getItem("usuarioID");
         try{
-            const response = await fetch ("http://localhost:4000/reporte");
-            
+            const response = await fetch (
+                `http://localhost:4000/reporte?idSesion=${encodeURIComponent(uid)}`
+            );
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                setError(err.error || "No se pudo generar el reporte");
+                return;
+            }
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
 
@@ -137,12 +146,37 @@ const Equipos =() =>{
                         ))}
         
                         <div className='acciones'> 
-                            <BotonIcono texto="Reporte" icono="bi-download" onClick={reporte} />
-                            <Link to="/Foltec/RegistroEquipos"> 
-                            <BotonIcono texto="Registrar" icono="bi-folder-plus" /> 
+                            <BotonIcono
+                                texto="Reporte"
+                                icono="bi-download"
+                                onClick={reporte}
+                                disabled={!tiene("reportes.exportar")}
+                            />
+                            <Link
+                                to="/Foltec/RegistroEquipos"
+                                style={{
+                                    opacity: tiene("equipos.registrar") ? 1 : 0.55,
+                                    pointerEvents: tiene("equipos.registrar") ? "auto" : "none",
+                                }}
+                            >
+                            <BotonIcono
+                                texto="Registrar"
+                                icono="bi-folder-plus"
+                                disabled={!tiene("equipos.registrar")}
+                            />
                             </Link>
-                            <Link to="/Foltec/Equipos/asignacion"> 
-                            <BotonIcono texto="Asignar Equipo" icono="bi-window-plus" /> 
+                            <Link
+                                to="/Foltec/Equipos/asignacion"
+                                style={{
+                                    opacity: tiene("equipos.asignar") ? 1 : 0.55,
+                                    pointerEvents: tiene("equipos.asignar") ? "auto" : "none",
+                                }}
+                            >
+                            <BotonIcono
+                                texto="Asignar Equipo"
+                                icono="bi-window-plus"
+                                disabled={!tiene("equipos.asignar")}
+                            />
                             </Link>
                         </div>
     

@@ -31,9 +31,42 @@ const pool = new Pool({
   },
 });
 
+async function usuarioTienePermiso(idUsuario, codigoPermiso) {
+  const id = Number(idUsuario);
+  if (!Number.isInteger(id)) return false;
+  const r = await pool.query(
+    `SELECT 1 FROM "Usuarios" u
+     INNER JOIN "RolPermiso" rp ON u."IdRol" = rp."IdRol"
+     INNER JOIN "Permiso" p ON rp."IdPermiso" = p."IdPermiso"
+     WHERE u."IdUsuario" = $1 AND p."Codigo" = $2`,
+    [id, codigoPermiso]
+  );
+  return r.rows.length > 0;
+}
+
+function normalizarFilaUsuario(row) {
+  if (!row || typeof row !== "object") return row;
+  const nombreRol =
+    row.NombreRol ?? row.nombrerol ?? row.nombre_rol ?? null;
+  return { ...row, NombreRol: nombreRol };
+}
+
 app.get("/reporte", async (req, res) =>{
 
 try{
+  const idSesion =
+    req.query.idSesion != null && req.query.idSesion !== ""
+      ? Number(req.query.idSesion)
+      : NaN;
+  if (!Number.isInteger(idSesion)) {
+    return res
+      .status(400)
+      .json({ error: "Falta idSesion en la URL del reporte" });
+  }
+  if (!(await usuarioTienePermiso(idSesion, "reportes.exportar"))) {
+    return res.status(403).json({ error: "Sin permiso para exportar reportes" });
+  }
+
   const asignados = await pool.query( 
     `SELECT u."NombreUsuario", u."NombresApellidos", c."IDPc", c."Serial", a."FechaAsignacion" FROM "Asignacion" a JOIN "Usuarios" u ON  a."IdUsuario" = u."IdUsuario" JOIN "Computadoras" c ON a."IDPc" = c."IDPc" WHERE a."FechaDevolucion" IS NULL` 
   );
@@ -140,9 +173,69 @@ try{
 
 })
 
-app.post ("/api/devolver", async (req, res) =>{
-  const { IDPc, EstadoEntrega, fecha, Observaciones, } = req.body;
+app.get("/api/sesion/:id/permisos", async (req, res) => {
+  const id =
+    req.params.id != null && req.params.id !== ""
+      ? Number(req.params.id)
+      : NaN;
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({ error: "Id de usuario inválido" });
+  }
   try {
+    const result = await pool.query(
+      `SELECT r."Nombre" AS "nombreRol",
+        COALESCE(
+          (SELECT json_agg(p."Codigo" ORDER BY p."Codigo")
+           FROM "RolPermiso" rp2
+           JOIN "Permiso" p ON rp2."IdPermiso" = p."IdPermiso"
+           WHERE rp2."IdRol" = u."IdRol"),
+          '[]'::json
+        ) AS permisos
+       FROM "Usuarios" u
+       LEFT JOIN "Rol" r ON u."IdRol" = r."IdRol"
+       WHERE u."IdUsuario" = $1`,
+      [id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+    let permisos = result.rows[0].permisos;
+    if (typeof permisos === "string") {
+      try {
+        permisos = JSON.parse(permisos);
+      } catch {
+        permisos = [];
+      }
+    }
+    if (!Array.isArray(permisos)) permisos = [];
+
+    const fila = result.rows[0];
+    const nombreRol =
+      fila.nombreRol ?? fila.nombrerol ?? fila.NombreRol ?? null;
+
+    res.json({
+      nombreRol,
+      permisos,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error al obtener permisos" });
+  }
+});
+
+app.post ("/api/devolver", async (req, res) =>{
+  const { IDPc, EstadoEntrega, fecha, Observaciones, IdUsuarioSesion } = req.body;
+  try {
+    const idSesion =
+      IdUsuarioSesion != null && IdUsuarioSesion !== ""
+        ? Number(IdUsuarioSesion)
+        : NaN;
+    if (!Number.isInteger(idSesion)) {
+      return res.status(400).json({ error: "Sesión no válida" });
+    }
+    if (!(await usuarioTienePermiso(idSesion, "equipos.asignar"))) {
+      return res.status(403).json({ error: "Sin permiso para devolver equipos" });
+    }
 
     const asignacion = await pool.query(
       `SELECT * FROM "Asignacion"
@@ -189,8 +282,19 @@ app.post ("/api/devolver", async (req, res) =>{
 });
 app.post ("/api/asignar", async (req, res) =>{
 
-  const {IDUsuario, fecha, IDPc, Observaciones} = req.body;
+  const {IDUsuario, fecha, IDPc, Observaciones, IdUsuarioSesion} = req.body;
   try{
+    const idSesion =
+      IdUsuarioSesion != null && IdUsuarioSesion !== ""
+        ? Number(IdUsuarioSesion)
+        : NaN;
+    if (!Number.isInteger(idSesion)) {
+      return res.status(400).json({ error: "Sesión no válida" });
+    }
+    if (!(await usuarioTienePermiso(idSesion, "equipos.asignar"))) {
+      return res.status(403).json({ error: "Sin permiso para asignar equipos" });
+    }
+
     await pool.query(
       'INSERT INTO "Asignacion" ("IdUsuario", "FechaAsignacion", "IDPc","Observaciones") VALUES ($1, $2, $3, $4)',
       [IDUsuario, fecha, IDPc, Observaciones]
@@ -334,7 +438,7 @@ app.get("/api/usuarios", async (req, res)=> {
         LEFT JOIN "Computadoras" c ON a."IDPc" = c."IDPc"
         LEFT JOIN "Rol" r ON u."IdRol" = r."IdRol"`
     );
-    res.json(result.rows);
+    res.json(result.rows.map(normalizarFilaUsuario));
   }catch (err){
     console.error(err);
     res.status(500).json({error: "Error al obtener usuarios"})
@@ -374,12 +478,58 @@ app.get ("/api/select", async (req, res) => {
 })
 app.put("/api/usuario/:id", async (req,res)=> {
   const {id} = req.params;
-  const {TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario} = req.body;
+  const {
+    IdUsuarioSesion,
+    IdRol,
+    TipoDocumento,
+    NumeroDocumento,
+    Contacto,
+    Estado,
+    Correo,
+    Area,
+    Cargo,
+    NombreUsuario,
+  } = req.body;
 
   try{
+    const idSesion =
+      IdUsuarioSesion != null && IdUsuarioSesion !== ""
+        ? Number(IdUsuarioSesion)
+        : NaN;
+    if (!Number.isInteger(idSesion)) {
+      return res.status(400).json({ error: "Sesión no válida" });
+    }
+    if (!(await usuarioTienePermiso(idSesion, "usuarios.registrar"))) {
+      return res.status(403).json({ error: "Sin permiso para editar usuarios" });
+    }
+
+    const idRolNum =
+      IdRol != null && IdRol !== "" ? Number(IdRol) : NaN;
+    if (!Number.isInteger(idRolNum)) {
+      return res.status(400).json({ error: "Debe seleccionar un rol válido" });
+    }
+    const rolExiste = await pool.query(
+      'SELECT 1 FROM "Rol" WHERE "IdRol" = $1',
+      [idRolNum]
+    );
+    if (rolExiste.rows.length === 0) {
+      return res.status(400).json({ error: "El rol no existe" });
+    }
+
     const result = await pool.query(
-      'UPDATE "Usuarios" SET "TipoDocumento" = $1, "NumeroDocumento" = $2, "Contacto" = $3, "Estado" = $4, "Correo" = $5, "Area"= $6, "Cargo"= $7, "NombreUsuario"=$8 WHERE "IdUsuario" = $9 RETURNING *',
-      [TipoDocumento, NumeroDocumento, Contacto, Estado, Correo, Area, Cargo, NombreUsuario, id]
+      `UPDATE "Usuarios" SET "TipoDocumento" = $1, "NumeroDocumento" = $2, "Contacto" = $3, "Estado" = $4, "Correo" = $5, "Area"= $6, "Cargo"= $7, "NombreUsuario"=$8, "IdRol" = $9 WHERE "IdUsuario" = $10 RETURNING *`,
+      [
+        TipoDocumento,
+        NumeroDocumento,
+        Contacto,
+        Estado,
+        Correo,
+        Area,
+        Cargo,
+        NombreUsuario,
+        idRolNum,
+        id,
+      ]
     );
     if(result.rows.length === 0)
       return res.status (400).json({error: "Usuario no encontrado"})
@@ -407,9 +557,28 @@ app.get("/api/usuario/:id", async (req, res) =>{
 
 app.put("/api/equipo/:id", async (req,res)=> {
   const {id} = req.params;
-  const {Marca, MAC, Serial, Estado, TipoPc, Descripcion} = req.body;
+  const {
+    IdUsuarioSesion,
+    Marca,
+    MAC,
+    Serial,
+    Estado,
+    TipoPc,
+    Descripcion,
+  } = req.body;
 
   try{
+    const idSesion =
+      IdUsuarioSesion != null && IdUsuarioSesion !== ""
+        ? Number(IdUsuarioSesion)
+        : NaN;
+    if (!Number.isInteger(idSesion)) {
+      return res.status(400).json({ error: "Sesión no válida" });
+    }
+    if (!(await usuarioTienePermiso(idSesion, "equipos.registrar"))) {
+      return res.status(403).json({ error: "Sin permiso para editar equipos" });
+    }
+
     const result = await pool.query(
       'UPDATE "Computadoras" SET "Marca" = $1, "MAC" = $2, "Serial" = $3, "Estado" = $4, "TipoPc" = $5, "Descripcion"= $6  WHERE "IDPc" = $7 RETURNING *',
       [Marca, MAC, Serial, Estado, TipoPc, Descripcion, id]
@@ -469,7 +638,7 @@ app.get("/api/buscar", async (req, res) => {
       [`%${q}%`]
     );
 
-    res.json(result.rows);
+    res.json(result.rows.map(normalizarFilaUsuario));
   } catch (err){
     console.error(err);
     res.status(500).json({error: "Error al buscar el personal"});
@@ -478,9 +647,28 @@ app.get("/api/buscar", async (req, res) => {
 
 
 app.post("/api/equipos", async (req, res)=>{
-  const {IDPc, MAC, Serial, Marca, Descripcion, Estado, TipoPc} = req.body;
+  const {
+    IdUsuarioSesion,
+    IDPc,
+    MAC,
+    Serial,
+    Marca,
+    Descripcion,
+    Estado,
+    TipoPc,
+  } = req.body;
 
   try {
+    const idSesion =
+      IdUsuarioSesion != null && IdUsuarioSesion !== ""
+        ? Number(IdUsuarioSesion)
+        : NaN;
+    if (!Number.isInteger(idSesion)) {
+      return res.status(400).json({ error: "Sesión no válida" });
+    }
+    if (!(await usuarioTienePermiso(idSesion, "equipos.registrar"))) {
+      return res.status(403).json({ error: "Sin permiso para registrar equipos" });
+    }
 
     await pool.query(
       'INSERT INTO "Computadoras" ("IDPc", "MAC","Serial", "Marca", "Descripcion", "Estado", "TipoPc") VALUES ($1,$2,$3,$4,$5,$6,$7)',
@@ -502,14 +690,15 @@ app.post("/api/login", async (req, res) => {
     const result = await pool.query(
       `SELECT u.*,
         COALESCE(
-          (SELECT json_agg(p."Codigo")
+          (SELECT json_agg(p."Codigo" ORDER BY p."Codigo")
            FROM "RolPermiso" rp
            JOIN "Permiso" p ON rp."IdPermiso" = p."IdPermiso"
            WHERE rp."IdRol" = u."IdRol"),
           '[]'::json
         ) AS permisos
        FROM "Usuarios" u
-       WHERE u."NombreUsuario"=$1`,
+       WHERE LOWER(TRIM(u."NombreUsuario")) = LOWER(TRIM($1))
+       LIMIT 1`,
       [Usuario]
     );
 
