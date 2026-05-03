@@ -1,9 +1,10 @@
 import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+
 // Importa el CSS en tu archivo principal o aquí
 // import 'leaflet/dist/leaflet.css';
 
-const LeafletMapComponent = () => {
+const Localizador = () => {
   const position = [4.7110, -74.0721]; // Latitud y Longitud de ejemplo
 
   return (
@@ -26,4 +27,4 @@ const LeafletMapComponent = () => {
   );
 };
 
-export default LeafletMapComponent;
+export default Localizador;

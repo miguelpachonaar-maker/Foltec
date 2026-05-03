@@ -3,6 +3,8 @@ import "../Estilos/Estilos.css";
 // Se importa 'useNavigate' para redirigir al usuario tras un login exitoso
 import { useNavigate } from 'react-router-dom'; 
 
+
+
 const LogIn = () => {
     // Hook para manejar la navegación programáticamente
     const navigate = useNavigate(); 
@@ -13,6 +15,7 @@ const LogIn = () => {
         Contraseña: ''
     });
     
+
     // 2. Estado para manejar y mostrar mensajes de error de la validación
     const [error, setError] = useState(''); 
 
@@ -43,13 +46,30 @@ const LogIn = () => {
             });
 
             const data = await response.json();
+            console.log("RESPUESTA BACKEND:", data);
 
             if (response.ok) {
+                
+                if (!data.usuarioID || !data.nombre) {
+                setError('Error en la respuesta del servidor: faltan datos del usuario.');
+                return;
+            }
+
+                // Guardar sesión
+                localStorage.setItem("auth", "true");
+                localStorage.setItem("usuarioID", String(data.usuarioID));
+                localStorage.setItem("nombreUsuario", data.nombre);
+                localStorage.setItem(
+                    "permisosUsuario",
+                    JSON.stringify(Array.isArray(data.permisos) ? data.permisos : [])
+                );
                 // Validación exitosa: Redirigir al inventario
                 console.log('Login exitoso:', data.mensaje);
                 // Si el backend devuelve un token, lo guardarías aquí (ej: localStorage.setItem('token', data.token);)
                 
-                navigate('/PaginaInventario'); 
+                navigate('/Foltec');
+ 
+
 
             } else {
                 // Validación fallida (error 401, 400, etc., del servidor)

@@ -1,214 +1,211 @@
 import '../Estilos/Estilos.css'
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import BotonIcono from '../Estilos/botonIcono';
+import { usePermisos } from '../hooks/usePermisos';
 
-const API_URL = 'http://localhost:4000/api/registros';
     
-{/*ACCION EQUIPOS*/}
 const FormEquipos = () => {
-    const [formData, setFormData] = useState({
+    const [credenciales, setCredenciales] = useState({
         IDPc: '',
         MAC: '',
         Serial: '',
         Marca: '',        
-        UsuarioAnyDesk: '',
+        Descripcion: '',
         Estado: '',
-        Asignacion: '',
-        Descripcion: ''
+        TipoPc:''
     });
 
-    const [equipo, setEquipos] = useState([]);
+    const [estados, setEstados] = useState([]);
+    const [marca, setMarca] = useState([]);
+    const [error, setError] = useState(''); 
+    const [mensaje, setMensaje] = useState('');
+    const navegar = useNavigate();
+    const { permisos, cargando } = usePermisos();
 
-    // Función genérica para actualizar el estado cuando cualquier input cambia
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevFormData => ({
-            ...prevFormData,
-            [name]: value
-        }));
-    };
-
-    const handleSubmit = async (e) => {
-            e.preventDefault();
-                const nuevoEquipoSimulado = {
-                ...formData,
-                // Simulamos un ID de MongoDB (único y necesario para la 'key' de React)
-                _id: Date.now().toString(), 
-                };
-    
-                alert('Equipo guardado con éxito: ');
-                setEquipos(prevEquipos => [...prevEquipos, nuevoEquipoSimulado]);
-    
-                // Opcional: Limpiar el formulario y recargar la lista
-                setFormData({
-                    IDPc: '', MAC: '', Serial: '', Marca: '', UsuarioAnyDesk: '', Estado: '', Asignacion: '',
-                    Descripcion: ''
-                });
-        };
-
-    // Función para cargar los datos (Buscar o Visualizar)
-    const fetchEquipos = async () => {
-            console.warn("ADVERTENCIA: La carga inicial de usuarios está desactivada o fallando debido a un backend inactivo.");
-            setEquipos([]);
-        };
-        
-        // 5. Cargar los usuarios al montar el componente para visualización
         useEffect(() => {
-        fetchEquipos();
-    }, []);
+        if (cargando) return;
+        if (!Array.isArray(permisos) || !permisos.includes("equipos.registrar")) {
+            navegar("/Foltec/Equipos");
+            return;
+        }
+        fetch ("http://localhost:4000/api/select")
+        .then ((res) => res.json())
+        .then ((data) => {
+            setEstados(data.estados);
+            setMarca(data.marca);
+        })
+                 
+       .catch ((error) => console.error("Error: ", error));
+    }, [cargando, permisos, navegar]);
 
+    const handleChange = (e) => {
+        const {name, value} =e.target;
+
+        let nuevosDatos ={
+            ...credenciales,
+            [name]: value
+        };
+
+
+        if(name === "Marca"){
+            const marcaNormalizada = value.trim().toLowerCase();
+            if (["dell", "lenovo"].includes(marcaNormalizada)){
+                nuevosDatos.TipoPc ="";
+            } else if (["acer", "macbook"].includes(marcaNormalizada)){
+                nuevosDatos.TipoPc = "Portatil";
+            } else {
+                nuevosDatos.TipoPc = "Escritorio";
+            }
+        }
+        setCredenciales(nuevosDatos);
+     };
+
+    const handleSubmit = async (e) =>{
+        e.preventDefault();
+
+        const backendUrl = 'http://localhost:4000/api/equipos';
+
+        try{
+            const response = await fetch(backendUrl,{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...credenciales,
+                    IdUsuarioSesion: localStorage.getItem("usuarioID"),
+                }),
+            });
+            const data = await response.json();
+            if(response.ok){
+                setMensaje("Equipo registrado exitosamente");
+                setError('');
+                console.log(data)
+
+                setCredenciales({
+                    IDPc: '',
+                    MAC: '',
+                    Serial: '',
+                    Marca: '',        
+                    Descripcion: '',
+                    Estado: '',
+                    TipoPc:''
+                });
+            } else{
+                setError(data.error || "Error al Registrar");
+                setMensaje('');
+            }
+            
+        } catch (err){
+            console.error("Error", err)
+    }
+}
+    
 
 
     return <> 
-        <form onSubmit={handleSubmit}> 
-            <div className='TituloSecciones'>
-                <div className='EstiloTitulos'>
-                    <img src="https://static.vecteezy.com/system/resources/previews/010/882/188/non_2x/monitor-screen-computer-icon-display-electronic-flat-device-equipment-office-business-pc-front-view-vector.jpg" alt="" />
-                    <h2>Formulario de equipos</h2>
-                </div>
-            </div>
-            <div className='DivTodoForm'>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">ID PC</label>
+    <div className='DivTodoForm'>
+     <div className="FormCard"> 
+    <form onSubmit={handleSubmit}> 
+
+                    <h2>Registrar Equipos</h2>
+
+                <div >
+                    <label >ID PC</label>
                     <input 
                     type="text"
                     name='IDPc' 
-                    className="CamposFormEquipos"
                     placeholder='ING01'
-                    value={formData.IDPc}
+                    value={credenciales.IDPc}
                     onChange={handleChange}
                     />
                 </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">MAC</label>
+                <div>
+                    <label>MAC</label>
                     <input 
                     type="text"
                     name='MAC' 
-                    className="CamposFormEquipos"
                     placeholder='f0:34:56:bd:32:t3'
-                    value={formData.MAC}
+                    value={credenciales.MAC}
                     onChange={handleChange}
                     />
                 </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Serial</label>
+                <div>
+                    <label>Serial</label>
                     <input 
                     type="text"
-                    name='Serial' 
-                    className="CamposFormEquipos"
+                    name='Serial'
                     placeholder='SN'
-                    value={formData.Serial}
+                    value={credenciales.Serial}
                     onChange={handleChange}
                     />
                 </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Marca</label>
-                    <input 
-                    type="text"
-                    name='Marca' 
-                    className="CamposFormEquipos"
-                    placeholder='Marca'
-                    value={formData.Marca}
-                    onChange={handleChange}
-                    />
-                </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Usuario AnyDesk</label>
-                    <input 
-                    type="number"
-                    name='UsuarioAnyDesk' 
-                    className="CamposFormEquipos"
-                    placeholder='238 975 010'
-                    value={formData.UsuarioAnyDesk}
-                    onChange={handleChange}
-                    />
-                </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputEntregas">Estado</label>
+                <div >
+                    <label>Marca</label>
                     <select 
-                        className="CamposFormEntregas"
+                        name='Marca'
+                        value={credenciales.Marca}
+                        onChange={handleChange}
+                    >
+                        <option value="">Seleccione la Marca</option>
+                    {marca.map((marca)=>(
+                        <option key={marca.IdMarca} 
+                        value={marca.IdMarca}>{marca.IdMarca}</option>
+                    ))}
+                    </select>
+                </div>
+
+                  {["dell", "lenovo"].includes(credenciales.Marca?.trim().toLowerCase()) && (
+                    <div>
+                      <label>Tipo de PC</label>  
+                    <select 
+                        name='TipoPc'
+                        value={credenciales.TipoPc}
+                        onChange={handleChange}
+                    >
+                        <option value="">Seleccione la Marca</option>
+                        <option value="Escritorio">Escritorio</option>
+                        <option value="Portatil">Portatil</option>
+                    </select>
+                    </div>)
+                    }
+
+                <div>
+                    <label>Estado</label>
+                    <select 
                         name='Estado'
-                        value={formData.Estado}
+                        value={credenciales.Estado}
                         onChange={handleChange}
                     >
-                        <option value="" disabled selected> Elige una opción</option>
-                        <option value="Activo">Activo</option>
-                        <option value="Inactivo">Inactivo</option>
-                        <option value="Reparacion">Reparación</option>
+                        <option value="">Seleccione Estado</option>
+                    {estados.map((estado)=>(
+                        <option key={estado.IdEstado} 
+                        value={estado.IdEstado}>{estado.TipoEstado}</option>
+                    ))}
                     </select>
                 </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputEntregas">Asignación</label>
-                    <select 
-                        className="CamposFormEntregas"
-                        name='Asignacion'
-                        value={formData.Asignacion}
-                        onChange={handleChange}
-                    >
-                        <option value="" disabled selected> Elige una opción</option>
-                        <option value="Activo">Asignado</option>
-                        <option value="Inactivo">Libre</option>
-                    </select>
-                </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Descripción</label>
-                    <textarea 
+                <div className='CamposFull'>
+                    <label >Descripción</label>
+                    <input
                     type="text"
                     name='Descripcion' 
-                    className="CamposFormEquipos"
-                    placeholder='...'
-                    value={formData.Descripcion}
+                    placeholder='Observaciones'
+                    value={credenciales.Descripcion}
                     onChange={handleChange}
                     />
-                </div>
-            </div>     
-            <div className="BotonesFormEquipos">
-                <button type="submit" className="BotonGuardar">
-                    Guardar
-                </button>
-            </div>
+                </div>  
+                  
 
-            {/*Tabla registro EQUIPOS*/}
-            <div className='TituloSecciones'>
-                <div className='EstiloTitulos'>
-                    <h2>Registro de equipos</h2>
-                </div>
-                <br />
-                <h4>En este espacio podrás visualizar todos los registros del formulario</h4>
-            </div>
-            {equipo.length > 0 ? (
-                <div className='DivTablaUsuarios'>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID Pc</th>
-                                <th>MAC</th>
-                                <th>Serial</th>
-                                <th>Marca</th>
-                                <th>Usuario AnyDesk</th>
-                                <th>Estado</th>
-                                <th>Asignación</th>
-                                <th>Descripción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {equipo.map((equipo) => (
-                                <tr key={equipo._id}>
-                                    <td>{equipo.IDPc}</td>
-                                    <td>{equipo.MAC}</td>
-                                    <td>{equipo.Serial}</td>
-                                    <td>{equipo.Marca}</td>
-                                    <td>{equipo.UsuarioAnyDesk}</td>
-                                    <td>{equipo.Estado}</td>
-                                    <td>{equipo.Asignacion}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            ) : (
-                    <h2></h2>
-            )}
+                <BotonIcono texto="Guardar" icono="bi-floppy" type="submit" />
+                {mensaje && <p style={{ color: "green" }}>{mensaje}</p>}
+                {error && <p style={{ color: "red" }}>{error}</p>}
+
+
+
         </form>
+        </div> 
+        </div>
     </>
 }
 export default FormEquipos

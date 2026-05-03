@@ -2,17 +2,14 @@ import './Estilos/Estilos.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import LogIn from './PaginaLogIn/LogIn.jsx'
-import PaginaInventario from './PaginaInventario/PaginaInventario.jsx';
+import Index from './Index/Index.jsx';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LogIn />} />
-        <Route path="/PaginaInventario" element={<PaginaInventario />} /> 
-      </Routes>
+        <Index/>
     </BrowserRouter>
   </React.StrictMode>
 );

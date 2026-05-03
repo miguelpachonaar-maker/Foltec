@@ -1,244 +1,279 @@
 import '../Estilos/Estilos.css'
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
+import BotonIcono from '../Estilos/botonIcono';
+import { usePermisos } from '../hooks/usePermisos';
 
-const API_URL = 'http://localhost:4000/api/usuarios';
 
 const FormUsuarios = () => {
-    const [formData, setFormData] = useState({
-        EstadoUsuario: '',
-        NombresApellidos: '',
-        TipoDocumento: '',
-        NumeroDocumento: '',
-        Contacto: '',
-        Correo: '',
-        Area: '',
+    const [credenciales, setCredenciales] = useState({
+        Nombre: '',
+        TipoDocumento:'',
+        Documento: '',
+        Celular:'',
+        Estado: '',
+        Correo:'',
+        IdRol: '',
+        Area:'',
         Cargo: '',
         Usuario: '',
         Contraseña: ''
     });
+     const [error, setError] = useState(''); 
+     const [mensaje, setMensaje] = useState('');
+     const navegar = useNavigate();
+     const [areas, setAreas] = useState([]);
+     const [estados, setEstados] = useState([]);
+     const [documento, setDocumeto] = useState([]);
+     const [roles, setRoles] = useState([]);
+     const { permisos, cargando } = usePermisos();
 
-    const [usuarios, setUsuarios] = useState([]);
+    
+     const handleChange = (e) => {
+        setCredenciales({
+            ...credenciales,
+            [e.target.name]: e.target.value
+        });
+        setError('');
+     };
 
-    // Función genérica para actualizar el estado cuando cualquier input cambia
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevFormData => ({
-            ...prevFormData,
-            [name]: value
-        }));
-    };
+     useEffect(() => {
+        if (cargando) return;
+        if (!Array.isArray(permisos) || !permisos.includes("usuarios.registrar")) {
+            navegar("/Foltec/Usuarios");
+            return;
+        }
 
-    const handleSubmit = async (e) => {
+        Promise.all([
+            fetch("http://localhost:4000/api/select").then((res) => res.json()),
+            fetch("http://localhost:4000/api/roles").then((res) => res.json()),
+        ])
+            .then(([data, rolesData]) => {
+                setAreas(data.areas);
+                setEstados(data.estados);
+                setDocumeto(data.documento);
+                setRoles(Array.isArray(rolesData) ? rolesData : []);
+            })
+            .catch((err) => console.error("Error: ", err));
+    }, [navegar, cargando, permisos]);
+     const handleSubmit = async (e) => {
         e.preventDefault();
-            const nuevoUsuarioSimulado = {
-            ...formData,
-            // Simulamos un ID de MongoDB (único y necesario para la 'key' de React)
-            _id: Date.now().toString(), 
-            };
 
-            alert('Usuario guardado con éxito: ');
-            setUsuarios(prevUsuarios => [...prevUsuarios, nuevoUsuarioSimulado]);
-
-            // Opcional: Limpiar el formulario y recargar la lista
-            setFormData({
-                EstadoUsuario: '', NombresApellidos: '', TipoDocumento: '', NumeroDocumento: '', Contacto: '', Correo: '',
-                Area: '', Cargo: '', Usuario: '', Contraseña: ''
+        const backendUrl = 'http://localhost:4000/api/personal'; 
+        try{
+            const response = await fetch(backendUrl,{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...credenciales,
+                    IdUsuarioSesion: localStorage.getItem("usuarioID"),
+                }),
             });
-    };
+            const data = await response.json();
+            if(response.ok){
+                setMensaje("Usuario Registrado Correctamente");
+                setError('');
+                navegar('/Foltec/Usuarios')
+                console.log(data);
 
-    // Función para cargar los datos (Buscar o Visualizar)
-    const fetchUsuarios = async () => {
-        console.warn("ADVERTENCIA: La carga inicial de usuarios está desactivada o fallando debido a un backend inactivo.");
-        setUsuarios([]);
-    };
-    
-    // 5. Cargar los usuarios al montar el componente para visualización
-    useEffect(() => {
-        fetchUsuarios();
-    }, []);
- 
-        
-    
-    return <>
-        <form onSubmit={handleSubmit}>    
-            <div className='TituloSecciones'>
-                <div className='EstiloTitulos'>
-                    <img src="https://cdn-icons-png.flaticon.com/512/3200/3200751.png" alt="" />
-                    <h2>Formulario de usuarios</h2>
+                setCredenciales({
+                    NombresApellidos: '',
+                    TipoDocumento:'',
+                    NumeroDocumento: '',
+                    Contacto:'',
+                    Estado: '',
+                    Correo:'',
+                    IdRol: '',
+                    Area:'',
+                    Cargo: '',
+                    NombreUsuario: '',
+                    Contraseña: ''
+                });
+            } else {
+                setError(data.error || "Error al Registrar");
+                setMensaje('');
+            }
+            
+        } catch (err){
+            console.error("Error", err);
+        }
+
+     };
+
+     return (
+        <><div className='DivTodoForm'>
+          <div className="FormCard"> 
+        <form onSubmit={handleSubmit}>
+                    <h2>Registrar Personal</h2>
+            
+                <div className='CamposFull'>
+                <label>Nombres y Apellidos</label>
+                <input 
+                    type="text"
+                    name="NombresApellidos"
+                    id="NombresApellidos"
+                    placeholder="Nombre Completo"
+                    value={credenciales.NombresApellidos}
+                    onChange={handleChange}
+                    required
+                />
                 </div>
-            </div>        
-            <div className='DivTodoForm'>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputEntregas">Estado Usuario</label>
-                    <select 
-                        className="CamposFormEntregas"
-                        name='EstadoUsuario'
-                        value={formData.EstadoUsuario}
+                <div>
+                    <label>Tipo de Documento</label>
+                <select
+                    name='TipoDocumento'
+                    id='TipoDocumento'
+                    value={credenciales.TipoDocumento}
+                    onChange={handleChange}
+                    required
+                >
+                    <option value="">Seleccione Tipo Documento</option>
+                    {documento.map((documento)=>(
+                        <option key={documento.IdTipoDocumento} 
+                        value={documento.IdTipoDocumento}>{documento.IdTipoDocumento}</option>
+                    ))}
+                </select>
+                </div>
+                <div>
+                    <label>Numero de documento</label>
+                <input
+                    type="text"
+                    name="NumeroDocumento"
+                    id="NumeroDocumento"
+                    placeholder="Número de Documento"
+                    value={credenciales.NumeroDocumento}
+                    pattern="[0-9]{2,}"
+                    onChange={handleChange}
+                    required
+                />
+                </div>
+                <div>
+                <label>Contacto</label>
+                <input 
+                    type="text"
+                    name="Contacto"
+                    id="Contacto"
+                    pattern='[0-9]{10}'
+                    placeholder='Número de Contacto'
+                    value={credenciales.Contacto}
+                    onChange={handleChange}
+                    required
+                />
+                </div>
+                <div>
+                    <label>Estado Usuario</label>
+                <select
+                    name='Estado'
+                    id='Estado'
+                    value={credenciales.Estado}
+                    onChange={handleChange}
+                    required
+                >
+                    <option value="">Seleccione Estado</option>
+                    {estados.map((estado)=>(
+                        <option key={estado.IdEstado} 
+                        value={estado.IdEstado}>{estado.IdEstado}</option>
+                    ))}
+                </select>
+                </div>
+                <div className='CamposFull'>
+                    <label>Correo</label>
+                    <input 
+                    type='text'
+                    name='Correo'
+                    id='Correo'
+                    placeholder='Correo'
+                    value={credenciales.Correo}
+                    onChange={handleChange}
+                    required
+                    />
+                </div>
+                <div className='CamposFull'>
+                    <label>Rol del usuario</label>
+                    <select
+                        name="IdRol"
+                        id="IdRol"
+                        value={credenciales.IdRol}
                         onChange={handleChange}
+                        required
                     >
-                        <option value="" disabled selected> - - -</option>
-                        <option value="Activo">Activo</option>
-                        <option value="Inactivo">Inactivo</option>
+                        <option value="">Seleccione un rol</option>
+                        {roles.map((rol) => (
+                            <option key={rol.IdRol} value={rol.IdRol}>
+                                {rol.Nombre}
+                            </option>
+                        ))}
                     </select>
                 </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Nombres y Apellidos</label>
-                    <input 
-                    type="text"
-                    name='NombresApellidos' 
-                    className="CamposFormEquipos"
-                    placeholder='Nombres'
-                    value={formData.NombresApellidos}
+                <div>
+                    <label>Area</label>
+                    <select 
+                    name='Area'
+                    id='Area'
+                    value={credenciales.Area}
                     onChange={handleChange}
-                    />
+                    required
+                    >
+                        <option value="">Seleccione Área</option>
+                        {areas.map((area)=>(
+                            <option key={area.IdArea} 
+                            value={area.IdArea} >{area.IdArea}</option>
+                        ))}
+                    
+                    </select>
                 </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Tipo de documento</label>
-                    <input 
-                    type="text"
-                    name='TipoDocumento' 
-                    className="CamposFormEquipos"
-                    placeholder='CC / CE'
-                    value={formData.TipoDocumento}
-                    onChange={handleChange}
-                    />
-                </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Numero de documento</label>
-                    <input 
-                    type="number"
-                    name='NumeroDocumento'  
-                    className="CamposFormEquipos"
-                    placeholder='1065738902'
-                    value={formData.NumeroDocumento}
-                    onChange={handleChange}
-                    />
-                </div>      
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Contacto</label>
+                <div>
+                    <label>Cargo</label>
                     <input
-                    type="number"
-                    name='Contacto'  
-                    className="CamposFormEquipos"
-                    placeholder='3201013344'
-                    value={formData.Contacto}
+                    type='text'
+                    name='Cargo'
+                    id='Cargo'
+                    value={credenciales.Cargo}
                     onChange={handleChange}
+                    required
+                    placeholder='Cargo'
                     />
                 </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Correo</label>
-                    <input 
-                    type="email"
-                    name='Correo' 
-                    className="CamposFormEquipos"
-                    placeholder='ejemplo@foltec.co'
-                    value={formData.Correo}
+                <div>
+                    <label>Usuario</label>
+                    <input
+                    type='text'
+                    name='NombreUsuario'
+                    id='NombreUsuario'
+                    value={credenciales.NombreUsuario}
                     onChange={handleChange}
+                    required
+                    pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]{4,20}"
+                    title="El usuario debe de contener entre 5 a 20 caracteres, sin números ni caracteres especiales"
+                    placeholder='Usuario'
                     />
                 </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputEntregas">Elige un área</label>
-                    <select 
-                        className="CamposFormEntregas"
-                        name='Area'
-                        value={formData.Area}
-                        onChange={handleChange}
-                    >
-                        <option value="" disabled selected> Elige un Área</option>
-                        <option value="Ingenieria">Ingeniería</option>
-                        <option value="Administracion">Administración</option>
-                        <option value="Compras">Compras</option>
-                        <option value="Comercial">Comercial</option>
-                        <option value="Ventas">Ventas</option>
-                        <option value="Logistica">Logística</option>
-                        <option value="RRHH">RRHH</option>
-                    </select>
-                </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Cargo</label>
+                <div>
+                    <label>Contraseña</label>
                     <input 
-                    type="text"
-                    name='Cargo' 
-                    className="CamposFormEquipos"
-                    placeholder='Coordinador TI'
-                    value={formData.Cargo}
-                    onChange={handleChange}
-                    />
-                </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Usuario</label>
-                    <input 
-                    type="number"
-                    name='Usuario'
-                    className="CamposFormEquipos"
-                    placeholder='101010'
-                    value={formData.Usuario}
-                    onChange={handleChange}
-                    />
-                </div>
-                <div className='DivCamposFormEquipos'>
-                    <label class="EtiquetaInputForm">Contraseña</label>
-                    <input 
-                    type="password"
+                    type='password'
                     name='Contraseña'
-                    className="CamposFormEquipos"
-                    placeholder='********'
-                    value={formData.Contraseña}
+                    id='Contraseña'
+                    pattern="[a-zA-ZÁÉÍÓÚáéíóúñÑ0-9._*$#!@?\-]{8,}"
+                    value={credenciales.Contraseña}
                     onChange={handleChange}
+                    required
+                    title='La contraseña no cumple con los parametros: Ingrese una contraseña con al menos 8 caracteres incluyendo números y caracteres especiales (._-/*$#!@?)'
+                    placeholder='******'
                     />
                 </div>
-            </div>
-            <div className="BotonesFormEquipos">
-                <button type="submit" className="BotonGuardar">
-                    Guardar
-                </button>
-            </div>
-            <div className='TituloSecciones'>
-                <div className='EstiloTitulos'>
-                    <h2>Registro de usuarios</h2>
-                </div>
-                <br />
-                <h4>En este espacio podrás visualizar todos los registros del formulario</h4>
-            </div>
-            {usuarios.length > 0 ? (
-                <div className='DivTablaUsuarios'>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Estado usuario</th>
-                                <th>Nombres y Apellidos</th>
-                                <th>Tipo de Documento</th>
-                                <th>N° Documento</th>
-                                <th>Contacto</th>
-                                <th>Correo  </th>
-                                <th>Área</th>
-                                <th>Cargo</th>
-                                <th>Usuario</th>
-                                <th>Contraseña</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {usuarios.map((user) => (
-                                <tr key={user._id}>
-                                    <td>{user.EstadoUsuario}</td>
-                                    <td>{user.NombresApellidos}</td>
-                                    <td>{user.TipoDocumento}</td>
-                                    <td>{user.NumeroDocumento}</td>
-                                    <td>{user.Contacto}</td>
-                                    <td>{user.Correo}</td>
-                                    <td>{user.Area}</td>
-                                    <td>{user.Cargo}</td>
-                                    <td>{user.Usuario}</td>
-                                    <td>{user.Contraseña} </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            ) : (
-                <p></p>
-            )}
-        </form>
-    </>
+                {mensaje && <p style={{ color: "green" }}>{mensaje}</p>}
+                {error && <p style={{ color: "red" }}>{error}</p>}
+               
+                    <BotonIcono texto="Guardar" icono="bi-floppy" type="submit" />
+         </form>
+         </div> 
+        </div>
+        </>
+     )
+
 }
+ 
 export default FormUsuarios

@@ -1,7 +1,18 @@
+
 * {
+  margin: 0;
   font-size: 20px;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  margin: 0;
+  box-sizing: border-box;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.main-content {
+  flex: 1;
 }
 
 @import 'leaflet/dist/leaflet.css';
@@ -85,6 +96,62 @@ a {
 
 
 /*ESTILOS USUARIOS*/
+
+.DivHeader {
+  background-color: rgb(0, 72, 91);
+  width: 100%;
+  color: rgb(0, 0, 0);
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.HeaderLeft,
+.HeaderCenter,
+.HeaderRight {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+ .HeaderLeft{
+  justify-content: flex-start;
+ }
+ .HeaderCenter{
+  justify-content: center;
+ }
+ .HeaderRight{
+  justify-content: flex-end;
+ }
+
+.HeaderLeft img {
+  height: 100px;
+  width: auto;
+}
+
+.HeaderCenter h3 {
+font-size: 35px;
+margin: 0;
+  color: #e0e0e0;
+  font-weight: bold;
+
+}
+
+.CerrarSesion {
+  padding: 8px 16px;
+  height: 40px;
+  color: #ffffff;
+  background-color:transparent;
+  border: 2px solid #ffffff;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.CerrarSesion:hover {
+  background-color: white;
+  color: rgb(0,72,91);
+}
+
 .HeaderInventario {
   background-color: rgb(0, 72, 91);
   width: 100%;
@@ -94,26 +161,13 @@ a {
   justify-content: space-between;
 }
 
-.DivHeader {
-  display: flex;
-  text-align: center;
-  align-items: center;
-}
+
 .DivHeader img {
   height: 13vh;
   width: 250px;
   padding-left: 60px;
 }
 
-.CerrarSesion {
-  padding: 20px 20px 0px 0px;
-  color: white;
-}
-.CerrarSesion:hover {
-  color: red;
-  transition: 0.5s;
-  cursor: pointer;
-}
 
 .BarraBusqueda {
   min-width: 400px;
@@ -127,8 +181,13 @@ a {
 
 .NavPrincipal {
   display: flex;
-  color: white;
+  background-color: rgb(1, 21, 172);
+  justify-content: center;
+  gap: 250px;
+  padding: 0 20px;
 }
+
+
 .NavPrincipal button {
   display: flex;
   align-items: center;
@@ -141,14 +200,32 @@ a {
   background-color: rgb(1, 21, 172);
   border: none;
 }
+
 .NavPrincipal button:hover {
   background-color: orange;
   transition: 0.5s;
   cursor: pointer;
 }
 
-.DivFormUsuarios {
-  padding-bottom: 25vh;
+.RutaPagina{
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.RutaPagina:hover {
+  background-color: white;
+  color: rgb(0,72,91);
+}
+
+.Links {
+  margin-top: 20px;
+  text-align: center;
+  color: blue;
+  text-decoration: underline;
 }
 
 /*TITULO-SECCIONES*/
@@ -220,28 +297,33 @@ tbody tr:hover {
   cursor: pointer;
 }
 
-/*ESTILO FORM EQUIPOS*/
+/*ESTILO FORMS*/
 .DivTodoForm {
   display: flex;
+  justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
-  margin: 0px 40px 40px 100px;
+  padding: 60px ;
 }
-.DivCamposFormEquipos {
+
+.FormCard {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 700px;
+  width: 100%;
+  box-shadow: 0px 30px 70px rgba(0, 0, 0, 0.2);
+  margin: auto;
+} 
+
+.FormCard h2 {
   text-align: center;
-  position: relative;
+  margin-bottom: 20px;
+  color: #bb2121;
+  grid-column:span 2;
 }
-.BotonesFormEquipos {
-  margin: 40px 0px 40px 100px;
-}
-.CamposFormEquipos {
-  height: 5vh;
-  width: 35vh;
-  border-radius: 10px;
-  text-align: center;
-  margin: 10px;
-  border-color: rgb(0, 72, 91);
-}
-.EtiquetaInputForm {
+
+.FormCard label {
   position: absolute;
   transform: translateY(-50%);
   top: 10px;
@@ -252,20 +334,319 @@ tbody tr:hover {
   color: rgb(0, 72, 91);
 }
 
-.BotonGuardar {
+.FormCard form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 25px;
+  row-gap: 15px;
+}
+
+.CamposFull {
+  grid-column:span 2;
+}
+
+.FormCard form div{
+  text-align: left;
+  position: relative;
+}
+
+.FormCard input,
+.FormCard select,
+.FormCard textarea {
+ height: 45px;
+  width: 100%;
+  border-radius: 10px;
+  text-align: center;
+  margin: 10px;
+  border-color: rgb(0, 72, 91);
+}
+
+.acciones {
+  display: flex;
+  gap: 20px; 
+  align-items: center;
+  margin-top: 10px;
+  justify-content: center;
+}
+.acciones button {
   background-color: rgb(1, 21, 172);
   color: white;
-  height: 40px;
-  width: 35vh;
+  height: 50px;
+  width: 250px; 
   border-radius: 10px;
-  border-color: rgb(1, 21, 172);
-  margin: 0px 10px 0px 10px;
+  border: none;
+  transition: all 0.3s ease;
+
 }
-.BotonGuardar:hover {
-  background-color: orange;
-  border-color: white;
-  transition: 0.3s;
+
+.acciones button:hover{
+  background: #0056b3;
+  transform: scale(1.05);
 }
+.acciones a {
+  text-decoration: none;
+  color: #0d47a1;
+  display: flex;
+  font-weight: 500;
+}
+
+.FormCard form button{
+  background-color: rgb(1, 21, 172);
+  color: white;
+  height: 50px;
+  width: 250px; 
+  border-radius: 10px;
+  border: none;
+  grid-column: span 2;
+  justify-self: center;
+   transition: all 0.3s ease;
+}
+
+.FormCard form button:hover{
+  background: #0056b3;
+  transform: scale(1.05);
+}
+
+
+
+/*ESTILOS RESULTADOS Y BUSQUEDA OPCION TABLA*/
+.TablaContainer {
+  width: 100%;
+  margin-top: 20px;
+}
+
+
+.TablaHeader {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  background: #0b1fa5;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px 10px 0 0;
+  font-weight: bold;
+}
+
+
+.TablaFila {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  padding: 15px 20px;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  transition: 0.2s ease;
+}
+
+
+.TablaFila:hover {
+  background: #f5f7ff;
+}
+
+
+.TablaFila:last-child {
+  border-radius: 0 0 10px 10px;
+}
+
+.estado-activo {
+  color: green;
+  font-weight: bold;
+}
+
+.estado-reparacion {
+  color: orange;
+  font-weight: bold;
+}
+.estado-inactivo {
+  color: rgb(255, 0, 0);
+  font-weight: bold;
+}
+
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+
+/*ESTILOS RESULTADOS Y BUSQUEDA*/
+.Busqueda {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 40px 20px;     
+  background-color: #f0f2f5; 
+
+}
+.BusquedaCard{
+  max-width: 1500px;   
+  width: 100%;           
+  margin: 30px auto;    
+  padding: 30px;        
+  background-color: #f9f9f9; 
+  border-radius: 12px;  
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  gap: 50px;
+  width: 100%;
+}
+
+.Busqueda input {
+  flex: 3;
+  height: 40px;
+  border-radius: 20px;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+} 
+
+.Busqueda form {
+  width: 100%;
+}
+
+.BusquedaContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+}
+
+.Busqueda button {
+  background-color: rgb(1, 21, 172);
+  color: white;
+  height: 50px;
+  width: 250px; 
+  border-radius: 10px;
+  border: none;
+  transition: all 0.3s ease;
+
+}
+
+.Busqueda button:hover{
+  background: #0056b3;
+  transform: scale(1.05);
+}
+
+.Resultadoscard {
+  width: 100%;
+  max-width: 1500px;
+  margin: 20px 0;   
+}
+
+.Resultados{
+  display: flex;
+  width: 100%; 
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 15px;
+  margin-top: 10px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  transition: 0.2s ease;
+}
+.Resultados:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: scale(1.01);
+}
+.Info h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.Info p {
+  margin: 0;
+  font-size: 15px;
+  color: rgb(0, 0, 0);
+}
+
+.Infor {
+  background: #f1f1f1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.Estado {
+  color: #000;
+}
+
+.Infor, .Estado {
+  text-align: left;
+}
+/*DETALLE USUARIOS*/
+.Detalles{
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.DetallesCard{
+  background: #f9f9f9;
+  padding: 20px 30px;
+  border-radius: 8px;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
+  width: max-content;
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+}
+.DetallesCard h2{
+  margin-bottom: 20px;
+}
+.campos-linea {
+  display: flex;
+  gap: 15px; 
+  flex-wrap: wrap; 
+  align-items: flex-start;
+}
+.campo-item {
+  display: flex;
+  flex-direction: column;
+
+}
+.DetallesCard input,
+.DetallesCard select{
+  width: 220px;
+  padding: 10px 12px;       
+  font-size: 14px;        
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff; 
+  box-sizing: border-box;
+  white-space: nowrap;
+ min-width: 200px;
+
+}
+
+.DetallesCard label {
+  display: block;
+  font-weight: bold;
+  margin-top: 10px;
+  font-size: 14px;
+}
+ .DetallesCard button{
+  background-color: rgb(1, 21, 172);
+  color: white;
+  height: 50px;
+  width: 550px; 
+  border-radius: 10px;
+  border: none;
+  transition: all 0.3s ease;
+ }
+
+ .DetallesCard button:hover{
+  background: #0056b3;
+  transform: scale(1.05);
+ }
 
 /*ESTILOS FORM ENTREGAS Y DEVOLUCIONES*/
 .EtiquetaInputEntregas {
